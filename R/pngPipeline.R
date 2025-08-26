@@ -55,7 +55,7 @@ pngPipelineCheckoutToTemp <- function(plotSpec) {
   }
 
   # Case 3: Fetch from commit
-  system(paste0("cd ", dirname(fileIn), " && git show ", plotSpec$commit, ":./", basename(fileIn), " > ", fileOut))
+  shell(paste0("cd ", shQuote(dirname(fileIn)), " && git show ", plotSpec$commit, ":./", shQuote(basename(fileIn)), " > ", shQuote(fileOut)), intern = FALSE)
 
   fileOut
 
@@ -166,8 +166,8 @@ idempotencyNoActionRequired <- function(fileIn, fileOut, commit) {
   }
 
   # Finally we are at file.exists and commit==HEAD. If the input file is older than the output file, we don't need to redo the step.
-  changeDateIn <- file.info(fileIn)["ctime"]
-  changeDateOut <- file.info(fileOut)["ctime"]
+  changeDateIn <- file.info(fileIn)["mtime"]
+  changeDateOut <- file.info(fileOut)["mtime"]
   changeDateIn <= changeDateOut
 }
 

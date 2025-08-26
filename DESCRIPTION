@@ -20,9 +20,9 @@ Imports:
     openxlsx,
     data.table,
     tools,
+    git2r,
     stats
 Suggests: 
-    git2r,
     ggplot2,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

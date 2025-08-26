@@ -34,15 +34,27 @@ test_that("Idempotency algorithm works", {
 
   # .. File exists, commit is HEAD and output file is newer: No action required -----
   plotSpec <- plotSpec(file.path(testDir, "01-Iris.pdf"), commit = "HEAD")
+  files <- do.call(epFiles, plotSpec)
   pngPipelineCheckoutToTemp(plotSpec)
   expect_true(idempotencyNoActionRequired(fileIn = files$path, fileOut = files$tmpPathCommit, commit = plotSpec$commit))
 
   # .. File exists, commit is HEAD and output file is older: Action required -----
   plotSpec <- plotSpec(file.path(testDir, "01-Iris.pdf"), commit = "HEAD")
+  files <- do.call(epFiles, plotSpec)
   pngPipelineCheckoutToTemp(plotSpec)
   Sys.sleep(1)
   ggsave(plot = pl + scale_color_brewer(palette = 2), filename = file.path(testDir, "01-Iris.pdf"), width = 15.5, height = 10, scale = 1, units = "cm")
   expect_false(idempotencyNoActionRequired(fileIn = files$path, fileOut = files$tmpPathCommit, commit = plotSpec$commit))
+
+
+
+  # -------------------------------------------------------------------------#
+  # Test cropping ----
+  # -------------------------------------------------------------------------#
+  plotSpec <- plotSpec(file.path(testDir, "01-Iris.pdf"), commit = "HEAD", xmax = 87, xmin = 10, ymin = 10)
+  files <- do.call(epFiles, plotSpec)
+  pngPipelineExtractPage(plotSpec)
+
 
   # -------------------------------------------------------------------------#
   # Cleanup ----
