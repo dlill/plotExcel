@@ -15,9 +15,10 @@
 #' epFiles(path, commit = "HEAD", page = 1)
 epFiles <- function(path, commit = "HEAD", page = 1, xmin = 0, xmax = 100, ymin = 0, ymax = 100, ...) {
   path <- normalizePath(path, mustWork = TRUE)
+  regexToRemove <- paste0("^(",normalizePath("~"),"|", "[:alpha:]:", ")")
 
   path                  = path
-  tmpPathCommit         = paste0(tools::file_path_sans_ext(gsub(normalizePath("~"), "/tmp", path)), "-commit-", commit, ".", tools::file_ext(path))
+  tmpPathCommit         = paste0(file.path(tempdir(), tools::file_path_sans_ext(gsub(regexToRemove, "", path))), "-commit-", commit, ".", tools::file_ext(path))
   tmpPathCommitPage     = paste0(tools::file_path_sans_ext(tmpPathCommit), sprintf("-page-%02d.png", page))
   tmpPathCommitPageCrop = paste0(tools::file_path_sans_ext(tmpPathCommitPage), sprintf("-crop-%03d-%03d-%03d-%03d.png", xmin, xmax, ymin, ymax))
 
@@ -27,7 +28,6 @@ epFiles <- function(path, commit = "HEAD", page = 1, xmin = 0, xmax = 100, ymin 
     tmpPathCommitPage     = tmpPathCommitPage,
     tmpPathCommitPageCrop = tmpPathCommitPageCrop)
 }
-
 
 
 
