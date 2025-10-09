@@ -208,13 +208,16 @@ populateExcel <- function(dParsed, dwidths, dheights, FLAGaddBorders) {
 # -------------------------------------------------------------------------#
 
 styleList <- list(
-  left       = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = NULL, valign = NULL),
-  center     = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "center"),
-  vcenter    = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", valign = "center"),
-  hvcenter   = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "center", valign = "center"),
-  rotateUp   = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "right", valign = "center", textRotation = 90),
-  rotateDown = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "left" , valign = "center", textRotation = -90),
-  plain      = openxlsx::createStyle()
+  left          = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = NULL, valign = NULL),
+  center        = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "center"),
+  vcenter       = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", valign = "center"),
+  hvcenter      = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "center", valign = "center"),
+  rotateUp      = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "right", valign = "center", textRotation = 90),
+  rotateDown    = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "left" , valign = "center", textRotation = -90),
+  leftSize48    = openxlsx::createStyle(fontSize = 48, wrapText = TRUE, textDecoration = "bold", halign = NULL, valign = NULL),
+  centerSize48  = openxlsx::createStyle(fontSize = 48, wrapText = TRUE, textDecoration = "bold", halign = "center"),
+  vcenterSize48 = openxlsx::createStyle(fontSize = 48, wrapText = TRUE, textDecoration = "bold", valign = "center"),
+  plain         = openxlsx::createStyle()
   )
 
 
