@@ -42,6 +42,12 @@
 plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = FALSE, FLAGpdf = FALSE, textColWidth = 5) {
 
   # -------------------------------------------------------------------------#
+  # Input verification ----
+  # -------------------------------------------------------------------------#
+  mf <- missing(filename)
+  if (mf) stop("filename can't be missing.")
+
+  # -------------------------------------------------------------------------#
   # Crunch ----
   # -------------------------------------------------------------------------#
   dParsed <- parseTable(d, headerRowStyle)
@@ -55,8 +61,13 @@ plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = F
   # Get width and height in cm.
   # It is a weird bug of gs that it does not include the dpi in the metadata, and somehow imagemagick can't overwrite the metadata...
   dParsed[ISPLOT == TRUE,c("WIDTHCM", "HEIGHTCM"):=(data.table::as.data.table(t(sapply(seq_along(FILE), function(i) {
-    pxInfo <- system(paste0('identify -format "%w\n%h" ', FILE[[i]]), intern = TRUE) # x pixels, y pixels
-    pxInfo <- as.numeric(pxInfo)
+    # Old apporach
+    # pxInfo <- system(paste0('identify -format "%w\n%h" ', FILE[[i]]), intern = TRUE) # x pixels, y pixels
+    # pxInfo <- as.numeric(pxInfo)
+
+    # New approach
+    img <- magick::image_read(FILE[[i]])
+    pxInfo <- unlist(magick::image_info(img)[c("width", "height")])
     pxInfo / SPEC[[i]]$resolution * 2.54
   }))))]
 
@@ -199,6 +210,8 @@ populateExcel <- function(dParsed, dwidths, dheights, FLAGaddBorders) {
 styleList <- list(
   left       = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = NULL, valign = NULL),
   center     = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "center"),
+  vcenter    = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", valign = "center"),
+  hvcenter   = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "center", valign = "center"),
   rotateUp   = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "right", valign = "center", textRotation = 90),
   rotateDown = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = "left" , valign = "center", textRotation = -90),
   plain      = openxlsx::createStyle()

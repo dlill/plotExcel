@@ -21,6 +21,8 @@ Imports:
     data.table,
     tools,
     git2r,
+    pdftools,
+    magick,
     stats
 Suggests: 
     ggplot2,

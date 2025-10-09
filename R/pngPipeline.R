@@ -89,17 +89,24 @@ pngPipelineExtractPage <- function(plotSpec) {
   }
 
   # Case 3: Extract page
-  cmd <- paste(
-    "gs",
-    "-dNOPAUSE -dBATCH -dSAFER",
-    "-sDEVICE=pngalpha",
-    paste0("-dFirstPage=", plotSpec$page, " -dLastPage=", plotSpec$page),
-    paste0("-r", plotSpec$resolution),
-    "-dPngUsePhysicalDimensions=true",
-    paste0("-sOutputFile=", shQuote(fileOut)),
-    shQuote(fileIn)
-  )
-  system(cmd, ignore.stdout = TRUE, ignore.stderr = TRUE)
+  if (Sys.info()["sysname"] == "Windows") {
+    # Don't want to apply magick approach across systems because of this security policy thingy on linux...
+    # Calls pdftools::pdf_render_page under the hood.
+    img <- magick::image_read_pdf(path = fileIn, pages = plotSpec$page, density = plotSpec$resolution)
+    magick::image_write(img, path = fileOut, density = plotSpec$resolution)
+  } else {
+    cmd <- paste(
+      "gs",
+      "-dNOPAUSE -dBATCH -dSAFER",
+      "-sDEVICE=pngalpha",
+      paste0("-dFirstPage=", plotSpec$page, " -dLastPage=", plotSpec$page),
+      paste0("-r", plotSpec$resolution),
+      "-dPngUsePhysicalDimensions=true",
+      paste0("-sOutputFile=", shQuote(fileOut)),
+      shQuote(fileIn)
+    )
+    system(cmd, ignore.stdout = TRUE, ignore.stderr = TRUE)
+  }
 
   # Now fix the missing dpi metadata which gs does not write
   # cmd <- paste("mogrify -units PixelsPerInch -density ", plotSpec$resolution, shQuote(fileOut))
@@ -131,16 +138,28 @@ pngPipelineCrop <- function(plotSpec) {
   ymin <- plotSpec$ymin
   ymax <- plotSpec$ymax
 
-  cmd <- paste(
-    "convert",
-    shQuote(fileIn),
-    "-crop", paste0(xmax-xmin,"%x",ymax-ymin,"%+",xmin,"%+%", ymin,"%"),
-    "+repage",
-    shQuote(fileOut)
-  )
+  # Old approch
+  # cmd <- paste(
+  #   "convert",
+  #   shQuote(fileIn),
+  #   "-crop", paste0(xmax-xmin,"%x",ymax-ymin,"%+",xmin,"%+%", ymin,"%"),
+  #   "+repage",
+  #   shQuote(fileOut)
+  # )
+  #
+  # hasFailed <- system(cmd)
+  # if(hasFailed != 0) {warning("Cropping failed for ", plotSpec$path, ", page", plotSpec$page)}
 
-  hasFailed <- system(cmd)
-  if(hasFailed != 0) {warning("Cropping failed for ", plotSpec$path, ", page", plotSpec$page)}
+  # New approach
+  img <- magick::image_read(fileIn)
+  imgDims <- magick::image_info(img)
+  widthPx <- (xmax-xmin)/100 * imgDims$width
+  heightPx <- (ymax-ymin)/100 * imgDims$height
+  x_offPx <- xmin/100 * imgDims$width
+  y_offPx <- ymin/100 * imgDims$height
+  img <- magick::image_crop(image = img, geometry = magick::geometry_area(width = widthPx, height = heightPx, x_off = x_offPx, y_off = y_offPx))
+  magick::image_write(image = img, path = fileOut, density = plotSpec$resolution)
+
   fileOut
 
 }
