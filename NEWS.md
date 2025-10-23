@@ -1,3 +1,7 @@
+# excelPlot 0.1.9
+
+* Catching missing files by inserting a dummy picture.
+
 # excelPlot 0.1.0
 
 * First version of the package.
