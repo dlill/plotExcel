@@ -55,7 +55,10 @@ pngPipelineCheckoutToTemp <- function(plotSpec) {
   }
 
   # Case 3: Fetch from commit
-  shell(paste0("cd ", shQuote(dirname(fileIn)), " && git show ", plotSpec$commit, ":./", shQuote(basename(fileIn)), " > ", shQuote(fileOut)), intern = FALSE)
+  fetchSuccessful <- shell(paste0("cd ", shQuote(dirname(fileIn)), " && git show ", plotSpec$commit, ":./", shQuote(basename(fileIn)), " > ", shQuote(fileOut)), intern = TRUE)
+  if (length(fetchSuccessful) > 0 && attr(fetchSuccessful, "status") != 0) {
+    file.copy(system.file("fileDoesNotExist.pdf", package = "excelPlot"), fileOut, overwrite = TRUE)
+  }
 
   fileOut
 
