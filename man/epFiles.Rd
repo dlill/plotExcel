@@ -8,6 +8,7 @@ epFiles(
   path,
   commit = "HEAD",
   page = 1,
+  resolution = 100,
   xmin = 0,
   xmax = 100,
   ymin = 0,
@@ -21,6 +22,8 @@ epFiles(
 \item{commit}{Default: HEAD, else a commit hash}
 
 \item{page}{Default 1, page numer to extract from the pdf}
+
+\item{resolution}{Resolution of the extracted png image, in dpi.}
 
 \item{xmin, xmax, ymin, ymax}{Crop the image from xmin to xmax and ymin to ymax. Allowed values: 0-100, units in percent.}
 

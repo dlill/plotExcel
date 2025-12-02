@@ -1,3 +1,7 @@
+# excelPlot 0.2.0
+
+* Add plotExcelFolder and compareProjects_excelPlot
+
 # excelPlot 0.1.9
 
 * Catching missing files by inserting a dummy picture.
