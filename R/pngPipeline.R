@@ -289,29 +289,54 @@ parsePlotSpec <- function(text) {
 }
 
 
+# -------------------------------------------------------------------------#
+# Diff ----
+# -------------------------------------------------------------------------#
+
+#' Parse the diff spec
+#'
+#' This function only makes sense in the exact context where it is applied in this package.
+#'
+#' @param ROWID Current row where the filenames of the files to be compared are pulled from
+#' @param VALUE Unparsed diff spec, e.g. "diff(col1,col2)"
+#' @param d parsed dInfo in the middle of the function where it is called
+#'
+#' @returns list of relevant arguments
+parseDiffSpec <- function(ROWID, VALUE, d) {
+  parseData <- getParseData(parse(text = VALUE))
+  parseData <- parseData$text[parseData$token == "SYMBOL"]
+  parseData <- gsub("`","", parseData)
+
+  VAR1 <- parseData[[1]]
+  VAR2 <- parseData[[2]]
+  rowid <- ROWID
+  file1 <- d[VARIABLE == VAR1 & ROWID == rowid, FILE][[1]]
+  file2 <- d[VARIABLE == VAR2 & ROWID == rowid, FILE][[1]]
+  resolution <- d[VARIABLE == VAR1 & ROWID == rowid, SPEC][[1]]$resolution
+
+  filename <- file.path(tempdir(), "diff", paste0(substr(digest::digest(c(file1,file2)),1,12), ".png"))
+
+  list(file1 = file1, file2 = file2, filename = filename, resolution = resolution)
+}
 
 
-# #' List all pages of a plot file
-# #'
-# #' @param path Path to plot file
-# #'
-# #' @return Vector with 1:npage
-# #' @export
-# #' @md
-# #' @importFrom tools file_ext
-# #' @importFrom pdftools pdf_length
-# #'
-# #' @examples
-# #' path <- system.file("exampleData/01-Iris.pdf", package = "excelPlot")
-# #' path <- system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot")
-# #' allpages(path)
-# all_pages <- function(path) {
-#   if (tools::file_ext(path) == "pdf") {
-#     1:pdftools::pdf_length(path)
-#   } else if (tools::file_ext(path) == "png") {
-#     1
-#   } else {
-#     stop("Unsupported file type (has to be pdf or png): ", tools::file_ext(path))
-#   }
-# }
+#' Apply the
+#'
+#' @param diffSpec Result from [parseDiffSpec()]
+#'
+#' @returns Called for side-effect
+applyImageDiff <- function(diffSpec) {
+  file1 <- diffSpec$file1
+  file2 <- diffSpec$file2
+  filename <- diffSpec$filename
+
+
+  t0 <- Sys.time()
+  cat("Diffing ", gsub("-commit-.*","",basename(file1)), " and ", gsub("-commit-.*","",basename(file2)), ": ... ")
+  dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
+  img <- magick::image_compare(magick::image_read(file1), magick::image_read(file2))
+  magick::image_write(img, path = filename)
+  cat(Sys.time() - t0, " s\n")
+  invisible(filename)
+}
 

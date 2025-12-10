@@ -13,7 +13,8 @@ plotExcelFolder(
   nPagesMax = 4,
   FLAGopenExcel = FALSE,
   FLAGtemp = FALSE,
-  filterRegexpRemove = NULL
+  filterRegexpRemove = NULL,
+  compareToCommit = NULL
 )
 }
 \arguments{
@@ -22,6 +23,23 @@ plotExcelFolder(
 \item{filename}{File path of the output excel file}
 
 \item{fileSelection}{Vector of plots to be included. Default: NULL = include all files}
+
+\item{resolution}{in dpi}
+
+\item{CFLAGLayout}{Default: "no". What to do with the layout data.table:
+"no" = Nothing, just continue,
+"return" = return the data.table instead of writing the excel. Useful if you want to modify this yourself, e.g. to add another plot with same structure as a second column.
+"insert" = insert the table as a tribble call into your script. Needs package github.com/dlill/RSAddins}
+
+\item{nPagesMax}{Maximum pages per file.}
+
+\item{FLAGopenExcel}{Open the excel file right away?}
+
+\item{FLAGtemp}{Write to temp file?}
+
+\item{filterRegexpRemove}{regex to remove files}
+
+\item{compareToCommit}{Commit hash to compare the current HEAD to.}
 }
 \value{
 Writes the Excel file to filename.
@@ -29,3 +47,15 @@ Writes the Excel file to filename.
 \description{
 Export all plots in a folder into Excel
 }
+\seealso{
+Other UI: 
+\code{\link{availableStyles}()},
+\code{\link{compareProjects_excelPlot}()},
+\code{\link{epFiles}()},
+\code{\link{parsePlotSpec}()},
+\code{\link{parseTextSpec}()},
+\code{\link{plotExcel}()},
+\code{\link{plotSpec}()},
+\code{\link{textSpec}()}
+}
+\concept{UI}

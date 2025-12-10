@@ -42,9 +42,11 @@ epFiles(path, commit = "HEAD", page = 1)
 \seealso{
 Other UI: 
 \code{\link{availableStyles}()},
+\code{\link{compareProjects_excelPlot}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
 \code{\link{plotExcel}()},
+\code{\link{plotExcelFolder}()},
 \code{\link{plotSpec}()},
 \code{\link{textSpec}()}
 }

@@ -4,12 +4,16 @@
 
 #' Export plots into an Excel table.
 #'
-#' @param d data.table("plot.pdf::spec...", "text::style", ...)
+#' @param d \code{data.table("plot.pdf::spec value::spec2 value2...", "text::style", "diff(colname1,colname2)", ...)}.
+#' For supported plot spec arguments, see [plotSpec()].
+#' Available text styles can be listed by [availableStyles()].
+#' Visual diffing of two plots is done by \code{"diff(colname1,colname2)"}, see example.
 #' @param filename File path to export excel file to.
 #' @param headerRowStyle Default: "center". Style used for header row.
 #' @param FLAGaddBorders Default: FALSE. Add borders around all cells?
 #' @param FLAGpdf Default: FALSE. Export Excel as pdf and open in pdf viewer? Useful for quick drafting.
 #' @param textColWidth Default: 5. Width of pure text columns, in cm.
+#'
 #'
 #' @returns `filename`, but is called for its side effect.
 #' @export
@@ -22,13 +26,15 @@
 #' @examples
 #' \dontrun{
 #' d <- data.table(tibble::tribble(
-#'   ~Description, ~`Plots 1`, ~`Plots 2`,
+#'   ~Description, ~`Plots 1`, ~`Plots 2`, ~Comparison,
 #'   "Crop::3",
 #'   paste0(system.file("exampleData/01-Iris.pdf", package = "excelPlot"), "::xmax 85"),
 #'   paste0(system.file("exampleData/02-Iris-Brewer.pdf", package = "excelPlot")),
+#'   "diff(`Plots 1`, `Plots 2`)",
 #'   "Text rotated up::4",
 #'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 2"),
-#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 1")
+#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 1"),
+#'   "diff(`Plots 1`, `Plots 2`)"
 #' ))
 #' filename <- "~/.excelPlot/example.xlsx"
 #' plotExcel(d, filename = filename, headerRowStyle = "center",
@@ -57,6 +63,10 @@ plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = F
   # -------------------------------------------------------------------------#
   # Apply extraction and cropping pipeline
   lapply(dParsed[ISPLOT == TRUE, SPEC], applyPngPipelineOnePage)
+
+  # Apply diffs, then flag them as plots
+  lapply(dParsed[ISDIFF == TRUE, SPEC], applyImageDiff)
+  dParsed[ISDIFF == TRUE,`:=`(ISPLOT = TRUE)]
 
   # Get width and height in cm.
   # It is a weird bug of gs that it does not include the dpi in the metadata, and somehow imagemagick can't overwrite the metadata...
@@ -134,10 +144,14 @@ parseTable <- function(d, headerRowStyle) {
 
   # Parse specs into lists and get certain variables into the main table
   d[,`:=`(ISPLOT = file.exists(gsub("::.*","", VALUE)))]
-  d[ISPLOT == FALSE,`:=`(SPEC = lapply(VALUE, function(x) {parseTextSpec(x)}))]
+  d[,`:=`(ISDIFF = grepl("diff\\(",VALUE))]
+  d[ISPLOT == FALSE & ISDIFF == FALSE,`:=`(SPEC = lapply(VALUE, function(x) {parseTextSpec(x)}))]
   d[ISPLOT == TRUE,`:=`(SPEC = lapply(VALUE, function(x) {parsePlotSpec(x)}))]
   d[ISPLOT == TRUE,`:=`(PATHS = lapply(SPEC, function(x) do.call(epFiles, x)))]
   d[,`:=`(FILE = sapply(PATHS, function(x) x$tmpPathCommitPageCrop))]
+
+  d[ISDIFF == TRUE,`:=`(SPEC = list(parseDiffSpec(ROWID = ROWID, VALUE = VALUE, d = d))), by = c("COLID", "ROWID")]
+  d[ISDIFF == TRUE,`:=`(FILE = sapply(SPEC, function(x) x$filename))]
 
   d
 }

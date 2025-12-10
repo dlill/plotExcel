@@ -1,3 +1,7 @@
+# excelPlot 0.2.1
+
+* Add diffing capability. plotExcelFolder now also has compareToCommit argument to compare diffing natively.
+
 # excelPlot 0.2.0
 
 * Add plotExcelFolder and compareProjects_excelPlot

@@ -1,17 +1,15 @@
 #' Compare plots of multiple folders with the same folder structure
 #'
-#' @param projectMulti named vector
-#' @param filename
-#' @param fileSelection
+#' @param projectMulti named vector to IQRnlmeProject folders
+#' @param filename filepath to wriet excel file to
+#' @param fileSelection vector of files to restrict selection to
 #'
-#' @returns
+#' @returns Writes a plotExcel file
 #' @export
 #' @md
-#' @family
+#' @family UI
 #' @importFrom pdftools pdf_length
 #' @importFrom data.table rbindlist
-#'
-#' @examples
 compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NULL, FLAGreturnDataFrame = FALSE) {
 
   mf <- missing(filename)
@@ -84,15 +82,28 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 #' @param path Path with plots. Will be searched recursively for pdf and png files
 #' @param filename File path of the output excel file
 #' @param fileSelection Vector of plots to be included. Default: NULL = include all files
+#' @param resolution in dpi
+#' @param CFLAGLayout Default: "no". What to do with the layout data.table:
+#' "no" = Nothing, just continue,
+#' "return" = return the data.table instead of writing the excel. Useful if you want to modify this yourself, e.g. to add another plot with same structure as a second column.
+#' "insert" = insert the table as a tribble call into your script. Needs package github.com/dlill/RSAddins
+#' @param nPagesMax Maximum pages per file.
+#' @param FLAGopenExcel Open the excel file right away?
+#' @param FLAGtemp Write to temp file?
+#' @param filterRegexpRemove regex to remove files
+#' @param compareToCommit Commit hash to compare the current HEAD to.
 #'
 #' @returns Writes the Excel file to filename.
 #' @export
 #' @md
-#' @family
+#' @family UI
 #' @importFrom tools file_ext
 #' @importFrom pdftools pdf_length
 #' @importFrom data.table rbindlist
-plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 150, CFLAGLayout = c("no", "return", "insert"), nPagesMax = 4, FLAGopenExcel = FALSE, FLAGtemp = FALSE, filterRegexpRemove = NULL) {
+plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 150, CFLAGLayout = c("no", "return", "insert"),
+                            nPagesMax = 4, FLAGopenExcel = FALSE, FLAGtemp = FALSE, filterRegexpRemove = NULL,
+                            compareToCommit = NULL
+                            ) {
 
 
   mf <- missing(filename)
@@ -154,6 +165,11 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
   dPdfInfo[,`:=`(plotSpec = paste0(file.path(path, pdfFile), "::page ", page, "::resolution ", resolution))]
   dPdfInfo[,`:=`(File = paste0(gsub("/", " / ", pdfFile), ", page ", page, "::vcenter"))]
   dPdfInfo <- dPdfInfo[,list(File, Plot = plotSpec)]
+
+  if (!is.null(compareToCommit)) {
+    dPdfInfo[,`:=`(OLD = paste0(Plot,"::commit ", compareToCommit))]
+    dPdfInfo[,`:=`(DIFF = "diff(Plot,OLD)")]
+  }
 
   if (CFLAGLayout == "return") {
     return(dPdfInfo)

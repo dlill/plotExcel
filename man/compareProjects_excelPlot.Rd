@@ -12,10 +12,27 @@ compareProjects_excelPlot(
 )
 }
 \arguments{
-\item{projectMulti}{named vector}
+\item{projectMulti}{named vector to IQRnlmeProject folders}
 
-\item{fileSelection}{}
+\item{filename}{filepath to wriet excel file to}
+
+\item{fileSelection}{vector of files to restrict selection to}
+}
+\value{
+Writes a plotExcel file
 }
 \description{
 Compare plots of multiple folders with the same folder structure
 }
+\seealso{
+Other UI: 
+\code{\link{availableStyles}()},
+\code{\link{epFiles}()},
+\code{\link{parsePlotSpec}()},
+\code{\link{parseTextSpec}()},
+\code{\link{plotExcel}()},
+\code{\link{plotExcelFolder}()},
+\code{\link{plotSpec}()},
+\code{\link{textSpec}()}
+}
+\concept{UI}

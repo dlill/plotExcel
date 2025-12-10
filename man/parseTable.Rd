@@ -7,7 +7,10 @@
 parseTable(d, headerRowStyle)
 }
 \arguments{
-\item{d}{data.table("plot.pdf::spec...", "text::style", ...)}
+\item{d}{\code{data.table("plot.pdf::spec value::spec2 value2...", "text::style", "diff(colname1,colname2)", ...)}.
+For supported plot spec arguments, see \code{\link[=plotSpec]{plotSpec()}}.
+Available text styles can be listed by \code{\link[=availableStyles]{availableStyles()}}.
+Visual diffing of two plots is done by \code{"diff(colname1,colname2)"}, see example.}
 
 \item{headerRowStyle}{Default: "center". Style used for header row.}
 }

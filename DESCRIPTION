@@ -1,7 +1,7 @@
 Package: excelPlot
 Type: Package
 Title: Export pdf or png Files Into Excel
-Version: 0.1.9
+Version: 0.2.1
 Authors@R: 
     person("Daniel", "Lill", , "dlill.unifreiburg@gmail.com", role = c("cre"))
 Maintainer: 
@@ -26,7 +26,9 @@ Imports:
     stats
 Suggests: 
     ggplot2,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    rstudioapi,
+    RSAddins
 Config/testthat/edition: 3
 URL: https://github.com/dlill/plotExcel
 BugReports: https://github.com/dlill/plotExcel/issues

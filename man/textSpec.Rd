@@ -23,10 +23,12 @@ textSpec(text = "Text 1", style = "rotateUp")
 \seealso{
 Other UI: 
 \code{\link{availableStyles}()},
+\code{\link{compareProjects_excelPlot}()},
 \code{\link{epFiles}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
 \code{\link{plotExcel}()},
+\code{\link{plotExcelFolder}()},
 \code{\link{plotSpec}()}
 }
 \concept{UI}

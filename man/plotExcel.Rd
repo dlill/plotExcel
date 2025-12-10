@@ -14,7 +14,10 @@ plotExcel(
 )
 }
 \arguments{
-\item{d}{data.table("plot.pdf::spec...", "text::style", ...)}
+\item{d}{\code{data.table("plot.pdf::spec value::spec2 value2...", "text::style", "diff(colname1,colname2)", ...)}.
+For supported plot spec arguments, see \code{\link[=plotSpec]{plotSpec()}}.
+Available text styles can be listed by \code{\link[=availableStyles]{availableStyles()}}.
+Visual diffing of two plots is done by \code{"diff(colname1,colname2)"}, see example.}
 
 \item{filename}{File path to export excel file to.}
 
@@ -35,13 +38,15 @@ Export plots into an Excel table.
 \examples{
 \dontrun{
 d <- data.table(tibble::tribble(
-  ~Description, ~`Plots 1`, ~`Plots 2`,
+  ~Description, ~`Plots 1`, ~`Plots 2`, ~Comparison,
   "Crop::3",
   paste0(system.file("exampleData/01-Iris.pdf", package = "excelPlot"), "::xmax 85"),
   paste0(system.file("exampleData/02-Iris-Brewer.pdf", package = "excelPlot")),
+  "diff(`Plots 1`, `Plots 2`)",
   "Text rotated up::4",
   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 2"),
-  paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 1")
+  paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 1"),
+  "diff(`Plots 1`, `Plots 2`)"
 ))
 filename <- "~/.excelPlot/example.xlsx"
 plotExcel(d, filename = filename, headerRowStyle = "center",
@@ -56,9 +61,11 @@ unlink(filename)
 \seealso{
 Other UI: 
 \code{\link{availableStyles}()},
+\code{\link{compareProjects_excelPlot}()},
 \code{\link{epFiles}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
+\code{\link{plotExcelFolder}()},
 \code{\link{plotSpec}()},
 \code{\link{textSpec}()}
 }

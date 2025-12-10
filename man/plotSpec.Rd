@@ -39,10 +39,12 @@ plotSpec <- plotSpec(path, commit = "asdf234", page = 1, xmax = 85)
 \seealso{
 Other UI: 
 \code{\link{availableStyles}()},
+\code{\link{compareProjects_excelPlot}()},
 \code{\link{epFiles}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
 \code{\link{plotExcel}()},
+\code{\link{plotExcelFolder}()},
 \code{\link{textSpec}()}
 }
 \concept{UI}

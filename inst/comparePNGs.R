@@ -30,16 +30,26 @@ library(dplyr)
 library(ggplot2)
 
 
-
 # -------------------------------------------------------------------------#
 #  ----
 # -------------------------------------------------------------------------#
+devtools::load_all("C:/PROJECTS/1_PROJTOOLS/excelPlot/")
 
 l <- paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 1")
 r <- paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 2")
 
+# fll <- applyPngPipelineOnePage(parsePlotSpec(l))
+# flr <- applyPngPipelineOnePage(parsePlotSpec(r))
 
+dInfo <- data.table(left = l, right = r, diff = "diff(left,right)")
 
+# debugonce(parseTable)
+# debugonce(plotExcel)
+# debugonce(parseDiffSpec)
+# debugonce(compareImages)
+plotExcel(dInfo, filename = "C:/PROJECTS/tmp.xlsx")
+
+browseURL(.Last.value)
 # -------------------------------------------------------------------------#
 # Exit ----
 # -------------------------------------------------------------------------#

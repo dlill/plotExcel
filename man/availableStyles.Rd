@@ -17,10 +17,12 @@ availableStyles()
 }
 \seealso{
 Other UI: 
+\code{\link{compareProjects_excelPlot}()},
 \code{\link{epFiles}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
 \code{\link{plotExcel}()},
+\code{\link{plotExcelFolder}()},
 \code{\link{plotSpec}()},
 \code{\link{textSpec}()}
 }
