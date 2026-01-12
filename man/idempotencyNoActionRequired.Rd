@@ -4,7 +4,7 @@
 \alias{idempotencyNoActionRequired}
 \title{Check if anything needs to be done on a plot file}
 \usage{
-idempotencyNoActionRequired(fileIn, fileOut, commit)
+idempotencyNoActionRequired(fileIn, fileOut, commit, fileIn2 = NULL)
 }
 \arguments{
 \item{fileIn}{Input file of the function where this function is called.}

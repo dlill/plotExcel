@@ -125,7 +125,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
   # Get basic overview of pdf files and pages
   pdfFiles <- list.files(path, pattern = "\\.(pdf|png)$", full.names = TRUE, recursive = TRUE)
   if (!is.null(filterRegexpRemove)) pdfFiles <- grep(filterRegexpRemove, pdfFiles, value = TRUE, invert = TRUE)
-  pdfFilesWithinProject <- gsub("^/", "", gsub(paste0(path), "", pdfFiles))
+  pdfFilesWithinProject <- gsub("^/?", "", gsub(paste0("^", path), "", pdfFiles))
 
   dPdfInfo <- lapply(setNames(pdfFiles, nm = pdfFilesWithinProject), function(x) {
     data.table(nPages = ifelse(tools::file_ext(x) == "pdf", pdftools::pdf_length(x), 1))

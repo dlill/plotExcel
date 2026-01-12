@@ -13,7 +13,8 @@
 #' @param FLAGaddBorders Default: FALSE. Add borders around all cells?
 #' @param FLAGpdf Default: FALSE. Export Excel as pdf and open in pdf viewer? Useful for quick drafting.
 #' @param textColWidth Default: 5. Width of pure text columns, in cm.
-#'
+#' @param FLAGopenExcel Default: FALSE. Open Excel after export?
+#' @param FLAGtemp Default: FALSE. Write to a temporary file?
 #'
 #' @returns `filename`, but is called for its side effect.
 #' @export
@@ -45,13 +46,17 @@
 #' # After inspection, remove the file
 #' unlink(filename)
 #' }
-plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = FALSE, FLAGpdf = FALSE, textColWidth = 5) {
+plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = FALSE, FLAGpdf = FALSE, textColWidth = 5,
+                      FLAGopenExcel = FALSE, FLAGtemp = FALSE) {
 
   # -------------------------------------------------------------------------#
   # Input verification ----
   # -------------------------------------------------------------------------#
   mf <- missing(filename)
-  if (mf) stop("filename can't be missing.")
+  if (mf & !FLAGtemp) stop("filename can't be missing when FLAGtemp == FALSE")
+  if (FLAGtemp) {
+    filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
+  }
 
   # -------------------------------------------------------------------------#
   # Crunch ----
@@ -109,6 +114,8 @@ plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = F
                   'export LD_LIBRARY_PATH && ', "bash -lic 'libreoffice --headless --convert-to pdf ",normalizePath(filename), " --outdir ", tempdir(), " ", normalizePath(filename), "'"), wait = TRUE)
     system(paste0("evince ", file.path(tempdir(), paste0(tools::file_path_sans_ext(basename(filename)), ".pdf"))), wait = FALSE)
   }
+
+  if (FLAGopenExcel) {shell.exec(normalizePath(filename))}
 
   invisible(filename)
 

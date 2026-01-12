@@ -10,7 +10,9 @@ plotExcel(
   headerRowStyle = "center",
   FLAGaddBorders = FALSE,
   FLAGpdf = FALSE,
-  textColWidth = 5
+  textColWidth = 5,
+  FLAGopenExcel = FALSE,
+  FLAGtemp = FALSE
 )
 }
 \arguments{
@@ -28,6 +30,10 @@ Visual diffing of two plots is done by \code{"diff(colname1,colname2)"}, see exa
 \item{FLAGpdf}{Default: FALSE. Export Excel as pdf and open in pdf viewer? Useful for quick drafting.}
 
 \item{textColWidth}{Default: 5. Width of pure text columns, in cm.}
+
+\item{FLAGopenExcel}{Default: FALSE. Open Excel after export?}
+
+\item{FLAGtemp}{Default: FALSE. Write to a temporary file?}
 }
 \value{
 \code{filename}, but is called for its side effect.

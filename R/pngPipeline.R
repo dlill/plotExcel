@@ -175,7 +175,7 @@ pngPipelineCrop <- function(plotSpec) {
 #'
 #' @return TRUE: A sound input output relationship is guaranteed even if we don't redo the step
 #' @md
-idempotencyNoActionRequired <- function(fileIn, fileOut, commit) {
+idempotencyNoActionRequired <- function(fileIn, fileOut, commit, fileIn2 = NULL) {
 
   if (!file.exists(fileOut)) {
     # Trivial case: File does not exist, we need to execute
@@ -189,6 +189,13 @@ idempotencyNoActionRequired <- function(fileIn, fileOut, commit) {
 
   # Finally we are at file.exists and commit==HEAD. If the input file is older than the output file, we don't need to redo the step.
   changeDateIn <- file.info(fileIn)["mtime"]
+  if (!is.null(fileIn2)) {
+    # Add possibility to have second input file for diffs.
+    # In this case, take the later file to compare against fileOut
+    changeDateIn2 <- file.info(fileIn2)["mtime"]
+    idx <- as.numeric(changeDateIn < changeDateIn2) + 1
+    changeDateIn <- c(changeDateIn, changeDateIn2)[idx]
+  }
   changeDateOut <- file.info(fileOut)["mtime"]
   changeDateIn <= changeDateOut
 }
@@ -330,7 +337,9 @@ applyImageDiff <- function(diffSpec) {
   file2 <- diffSpec$file2
   filename <- diffSpec$filename
 
-
+  if (idempotencyNoActionRequired(fileIn = file1, fileOut = filename, commit = "HEAD", fileIn2 = file2)){
+    return(filename)
+  }
   t0 <- Sys.time()
   cat("Diffing ", gsub("-commit-.*","",basename(file1)), " and ", gsub("-commit-.*","",basename(file2)), ": ... ")
   dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)
