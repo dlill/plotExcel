@@ -58,6 +58,12 @@ Writes the Excel file to filename.
 \description{
 Export all plots in a folder into Excel or diff two pdfs/pngs
 }
+\examples{
+\dontrun{
+plotExcelFolder(system.file("exampleData", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+diffpdf(system.file("exampleData/01-Iris.pdf", package =  "excelPlot"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+}
+}
 \seealso{
 Other UI: 
 \code{\link{availableStyles}()},

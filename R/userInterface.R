@@ -100,6 +100,11 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 #' @importFrom tools file_ext
 #' @importFrom pdftools pdf_length
 #' @importFrom data.table rbindlist
+#' @examples
+#' \dontrun{
+#' plotExcelFolder(system.file("exampleData", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+#' diffpdf(system.file("exampleData/01-Iris.pdf", package =  "excelPlot"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+#' }
 plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 150, CFLAGLayout = c("no", "return", "insert"),
                             nPagesMax = 4, FLAGopenExcel = FALSE, FLAGtemp = FALSE, filterRegexpRemove = NULL,
                             compareToCommit = NULL
@@ -211,6 +216,7 @@ diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExce
       filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
       deparsedfilename <- deparse(filename)
     }
+    CFLAGLayout <- match.arg(CFLAGLayout)
     verifyArg(FLAGopenExcel   , expectedMode = "logical")
     verifyArg(FLAGtemp        , expectedMode = "logical")
 

@@ -1,5 +1,6 @@
-# excelPlot 0.2.1
+# excelPlot 0.2.2
 
+* diffpdf as a direct UI function for diffing two files.
 * Catch case of path = "." in plotExcelFolder
 * Add FLAGopenExcel and FLAGtemp to plotExcel directly.
 
