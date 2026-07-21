@@ -77,7 +77,7 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 }
 
 
-#' Export all plots in a folder into Excel
+#' Export all plots in a folder into Excel or diff two pdfs/pngs
 #'
 #' @param path Path with plots. Will be searched recursively for pdf and png files
 #' @param filename File path of the output excel file
@@ -198,6 +198,66 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
   invisible(filename)
 }
 
+#' @family UI
+#' @export
+#' @rdname plotExcelFolder
+diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE, CFLAGLayout = c("no", "return", "insert")) {
+    mf <- missing(filename)
+    sf <- substitute(filename)
+    if (!FLAGtemp & !mf) {
+      # If print is wanted
+      deparsedfilename <- deparse(sf)
+    } else {
+      filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
+      deparsedfilename <- deparse(filename)
+    }
+    verifyArg(FLAGopenExcel   , expectedMode = "logical")
+    verifyArg(FLAGtemp        , expectedMode = "logical")
+
+    # Get basic overview of pdf files and pages
+    pdfFiles <- c(pdfFile1, pdfFile2)
+    pdfFilesWithinProject <- pdfFiles
+
+    dPdfInfo <- lapply(setNames(pdfFiles, nm = pdfFilesWithinProject), function(x) {
+      data.table(nPages = ifelse(tools::file_ext(x) == "pdf", pdftools::pdf_length(x), 1))
+    })
+    dPdfInfo <- data.table::rbindlist(dPdfInfo, idcol = "pdfFile")
+
+    # Further wrangling of death
+    dPdfInfo <- dPdfInfo[,list(page = 1:nPages), by = c("pdfFile")]
+    dPdfInfo[,`:=`(plotSpec = paste0(pdfFile, "::page ", page, "::resolution ", resolution))]
+    dPdfInfo <- data.table::dcast(dPdfInfo, page~pdfFile, value.var = "plotSpec")
+    data.table::setnames(dPdfInfo, c("Page", "File1", "File2"))
+    dPdfInfo[,`:=`(Diff = "diff(File1, File2)")]
+
+
+    if (CFLAGLayout == "return") {
+      return(dPdfInfo)
+    }
+    if (CFLAGLayout == "insert") {
+      e <- rstudioapi::getSourceEditorContext()
+      rstudioapi::documentSave(id = e$id)
+      row <- e$selection[[1]]$range$end[1]
+
+      codeToInsert <- paste0(c(paste0("dLayout <- ", RSAddins::outputMdTable2(dPdfInfo)),
+                               "",
+                               paste0("excelPlot::plotExcel(d = dLayout, filename = ", deparsedfilename, ", textColWidth = 10)"),
+                               "\n"),
+                             collapse = "\n")
+
+      rstudioapi::insertText(location = rstudioapi::document_position(row, 1), text = codeToInsert, e$id)
+      rstudioapi::documentSave(id = e$id)
+      return(invisible(dPdfInfo))
+    }
+
+
+    # Export
+    filename <- plotExcel(d = dPdfInfo, filename = filename, textColWidth = 10)
+
+    if (FLAGopenExcel) {shell.exec(normalizePath(filename))}
+
+    invisible(filename)
+  }
 
 
 

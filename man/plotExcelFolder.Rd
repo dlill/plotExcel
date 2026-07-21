@@ -2,7 +2,8 @@
 % Please edit documentation in R/userInterface.R
 \name{plotExcelFolder}
 \alias{plotExcelFolder}
-\title{Export all plots in a folder into Excel}
+\alias{diffpdf}
+\title{Export all plots in a folder into Excel or diff two pdfs/pngs}
 \usage{
 plotExcelFolder(
   path,
@@ -15,6 +16,16 @@ plotExcelFolder(
   FLAGtemp = FALSE,
   filterRegexpRemove = NULL,
   compareToCommit = NULL
+)
+
+diffpdf(
+  pdfFile1,
+  pdfFile2,
+  filename,
+  resolution = 100,
+  FLAGopenExcel = TRUE,
+  FLAGtemp = TRUE,
+  CFLAGLayout = c("no", "return", "insert")
 )
 }
 \arguments{
@@ -45,9 +56,19 @@ plotExcelFolder(
 Writes the Excel file to filename.
 }
 \description{
-Export all plots in a folder into Excel
+Export all plots in a folder into Excel or diff two pdfs/pngs
 }
 \seealso{
+Other UI: 
+\code{\link{availableStyles}()},
+\code{\link{compareProjects_excelPlot}()},
+\code{\link{epFiles}()},
+\code{\link{parsePlotSpec}()},
+\code{\link{parseTextSpec}()},
+\code{\link{plotExcel}()},
+\code{\link{plotSpec}()},
+\code{\link{textSpec}()}
+
 Other UI: 
 \code{\link{availableStyles}()},
 \code{\link{compareProjects_excelPlot}()},
