@@ -202,10 +202,15 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
   invisible(filename)
 }
 
+#' @param skip1,skip2 Optional integer vectors of output-row indices to leave blank for
+#'   File1 / File2. Skipped rows shift the remaining pages of that file down so that
+#'   pages meant to correspond can be aligned side-by-side. E.g. if file2 pages 1 and
+#'   2 correspond to file1 pages 1 and 5, pass `skip2 = c(2,3,4)`.
 #' @family UI
 #' @export
 #' @rdname plotExcelFolder
-diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE, CFLAGLayout = c("no", "return", "insert")) {
+diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE,
+                    skip1 = NULL, skip2 = NULL, CFLAGLayout = c("no", "return", "insert")) {
     mf <- missing(filename)
     sf <- substitute(filename)
     if (!FLAGtemp & !mf) {
@@ -218,22 +223,39 @@ diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExce
     CFLAGLayout <- match.arg(CFLAGLayout)
     verifyArg(FLAGopenExcel   , expectedMode = "logical")
     verifyArg(FLAGtemp        , expectedMode = "logical")
+    verifyArg(skip1           , expectedMode = "numeric", allowNull = TRUE)
+    verifyArg(skip2           , expectedMode = "numeric", allowNull = TRUE)
+    skip1 <- as.integer(skip1)
+    skip2 <- as.integer(skip2)
 
     # Get basic overview of pdf files and pages
     nPages1 <- getNPages(pdfFile1)
     nPages2 <- getNPages(pdfFile2)
-    nPagesTotal <- max(nPages1, nPages2)
 
-    # Build the data rows: one row per page, with File1 = pdfFile1 and File2 = pdfFile2
-    pageSeq <- seq_len(nPagesTotal)
+    # Build one column of plotSpecs, leaving `skip` output rows blank and shifting
+    # the remaining pages down. Returns a character vector whose length equals the
+    # last used output row.
+    buildFileCol <- function(pdfFile, nPages, skip, resolution) {
+      if (nPages == 0) return(character(0))
+      candidate  <- seq_len(nPages + length(skip))
+      nonSkip    <- setdiff(candidate, skip)
+      targetRows <- nonSkip[seq_len(nPages)]
+      out <- rep(NA_character_, max(targetRows))
+      out[targetRows] <- paste0(pdfFile, "::page ", seq_len(nPages), "::resolution ", resolution)
+      out
+    }
+    col1 <- buildFileCol(pdfFile1, nPages1, skip1, resolution)
+    col2 <- buildFileCol(pdfFile2, nPages2, skip2, resolution)
+
+    # Pad the shorter column with NA so both align to the same row count
+    nPagesTotal <- max(length(col1), length(col2))
+    length(col1) <- nPagesTotal
+    length(col2) <- nPagesTotal
+
     dPdfInfo <- data.table(
-      Page  = as.character(pageSeq),
-      File1 = ifelse(pageSeq <= nPages1,
-                     paste0(pdfFile1, "::page ", pageSeq, "::resolution ", resolution),
-                     NA_character_),
-      File2 = ifelse(pageSeq <= nPages2,
-                     paste0(pdfFile2, "::page ", pageSeq, "::resolution ", resolution),
-                     NA_character_)
+      Page  = as.character(seq_len(nPagesTotal)),
+      File1 = col1,
+      File2 = col2
     )
     dPdfInfo[,`:=`(Diff = "diff(File1, File2)")]
     dPdfInfo[is.na(File1) | is.na(File2),`:=`(Diff = "Page lengths differ - no diff available::center")]
