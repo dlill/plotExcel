@@ -235,7 +235,7 @@ diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExce
     dPdfInfo <- data.table::dcast(dPdfInfo, page~pdfFile, value.var = "plotSpec")
     data.table::setnames(dPdfInfo, c("Page", "File1", "File2"))
     dPdfInfo[,`:=`(Diff = "diff(File1, File2)")]
-
+    dPdfInfo[is.na(File1)| is.na(File2),`:=`(Diff = "Page lengths differ - no diff available::center")]
 
     if (CFLAGLayout == "return") {
       return(dPdfInfo)
