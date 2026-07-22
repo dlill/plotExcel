@@ -220,21 +220,27 @@ diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExce
     verifyArg(FLAGtemp        , expectedMode = "logical")
 
     # Get basic overview of pdf files and pages
-    pdfFiles <- c(pdfFile1, pdfFile2)
-    pdfFilesWithinProject <- pdfFiles
+    nPages1 <- getNPages(pdfFile1)
+    nPages2 <- getNPages(pdfFile2)
+    nPagesTotal <- max(nPages1, nPages2)
 
-    dPdfInfo <- lapply(setNames(pdfFiles, nm = pdfFilesWithinProject), function(x) {
-      data.table(nPages = getNPages(x))
-    })
-    dPdfInfo <- data.table::rbindlist(dPdfInfo, idcol = "pdfFile")
-
-    # Further wrangling of death
-    dPdfInfo <- dPdfInfo[,list(page = 1:nPages), by = c("pdfFile")]
-    dPdfInfo[,`:=`(plotSpec = paste0(pdfFile, "::page ", page, "::resolution ", resolution))]
-    dPdfInfo <- data.table::dcast(dPdfInfo, page~pdfFile, value.var = "plotSpec")
-    data.table::setnames(dPdfInfo, c("Page", "File1", "File2"))
+    # Build the data rows: one row per page, with File1 = pdfFile1 and File2 = pdfFile2
+    pageSeq <- seq_len(nPagesTotal)
+    dPdfInfo <- data.table(
+      Page  = as.character(pageSeq),
+      File1 = ifelse(pageSeq <= nPages1,
+                     paste0(pdfFile1, "::page ", pageSeq, "::resolution ", resolution),
+                     NA_character_),
+      File2 = ifelse(pageSeq <= nPages2,
+                     paste0(pdfFile2, "::page ", pageSeq, "::resolution ", resolution),
+                     NA_character_)
+    )
     dPdfInfo[,`:=`(Diff = "diff(File1, File2)")]
-    dPdfInfo[is.na(File1)| is.na(File2),`:=`(Diff = "Page lengths differ - no diff available::center")]
+    dPdfInfo[is.na(File1) | is.na(File2),`:=`(Diff = "Page lengths differ - no diff available::center")]
+
+    # Subheader row: empty Page, file paths in File1/File2, empty Diff
+    dSubheader <- data.table(Page = "", File1 = paste0("* ", pdfFile1), File2 = paste0("* ", pdfFile2), Diff = "")
+    dPdfInfo <- data.table::rbindlist(list(dSubheader, dPdfInfo), use.names = TRUE)
 
     if (CFLAGLayout == "return") {
       return(dPdfInfo)
