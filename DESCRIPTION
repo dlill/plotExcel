@@ -1,7 +1,7 @@
 Package: excelPlot
 Type: Package
 Title: Export pdf or png Files Into Excel
-Version: 0.2.2
+Version: 0.2.3
 Authors@R: 
     person("Daniel", "Lill", , "dlill.unifreiburg@gmail.com", role = c("cre"))
 Maintainer: 

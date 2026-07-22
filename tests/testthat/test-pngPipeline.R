@@ -27,6 +27,7 @@ test_that("Various steps of the pipeline work", {
   plotSpec <- plotSpec(file.path(testDir, "01-Iris.pdf"), commit = git2r::reflog(testDir)[[1]][[1]])
   files <- do.call(epFiles, plotSpec)
   pngPipelineCheckoutToTemp(plotSpec)
+  pngPipelineConvertOfficeToPdf(plotSpec)
   pngPipelineExtractPage(plotSpec)
   pngPipelineCrop(plotSpec)
 

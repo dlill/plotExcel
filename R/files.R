@@ -20,14 +20,22 @@ epFiles <- function(path, commit = "HEAD", page = 1, resolution = 100, xmin = 0,
   dirpath <- dirname(path)
   dirpathDigest <- substr(digest::digest(dirpath),1,12)
 
+  # Extension for the "converted to pdf" intermediate:
+  # - Office files (docx/doc/pptx/ppt) will be converted to pdf.
+  # - pdf/png files are just copied and keep their extension.
+  sourceExt <- tolower(tools::file_ext(path))
+  pdfExt <- if (sourceExt %in% c("docx", "doc", "pptx", "ppt")) "pdf" else sourceExt
+
   path                  = path
   tmpPathCommit         = paste0(file.path(tempdir(), dirpathDigest, paste0(tools::file_path_sans_ext(basepath), "-commit-", commit, ".", tools::file_ext(path))))
-  tmpPathCommitPage     = paste0(tools::file_path_sans_ext(tmpPathCommit), sprintf("-page-%02d-res-%02d.png", page, resolution))
+  tmpPathCommitPdf      = paste0(tools::file_path_sans_ext(tmpPathCommit), "-topdf.", pdfExt)
+  tmpPathCommitPage     = paste0(tools::file_path_sans_ext(tmpPathCommitPdf), sprintf("-page-%02d-res-%02d.png", page, resolution))
   tmpPathCommitPageCrop = paste0(tools::file_path_sans_ext(tmpPathCommitPage), sprintf("-crop-%03d-%03d-%03d-%03d.png", xmin, xmax, ymin, ymax))
 
   list(
     path                  = path,
     tmpPathCommit         = tmpPathCommit,
+    tmpPathCommitPdf      = tmpPathCommitPdf,
     tmpPathCommitPage     = tmpPathCommitPage,
     tmpPathCommitPageCrop = tmpPathCommitPageCrop)
 }

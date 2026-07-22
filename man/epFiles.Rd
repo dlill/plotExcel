@@ -43,6 +43,7 @@ epFiles(path, commit = "HEAD", page = 1)
 Other UI: 
 \code{\link{availableStyles}()},
 \code{\link{compareProjects_excelPlot}()},
+\code{\link{getNPages}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
 \code{\link{plotExcel}()},

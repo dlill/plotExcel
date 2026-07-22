@@ -8,6 +8,7 @@
 #' Currently, the pipeline has the following steps
 #'
 #' * Check out from git
+#' * Convert Office documents (docx/pptx) to pdf (or copy pdf/png through)
 #' * Extract page from pdf as png
 #' * Crop png to specified part
 #'
@@ -20,6 +21,8 @@ applyPngPipelineOnePage <- function(plotSpec) {
   verifyArg(plotSpec$page, expectedLength = 1)
   cat("File ", plotSpec$path, " page ", plotSpec$page, ": ")
   pngPipelineCheckoutToTemp(plotSpec)
+  cat(".")
+  pngPipelineConvertOfficeToPdf(plotSpec)
   cat(".")
   pngPipelineExtractPage(plotSpec)
   cat(".")
@@ -65,6 +68,159 @@ pngPipelineCheckoutToTemp <- function(plotSpec) {
 }
 
 
+#' Convert Office documents to PDF, or copy through pdf/png files
+#'
+#' Second stage of the plot preprocessing pipeline. Runs on the file produced by
+#' [pngPipelineCheckoutToTemp()] and writes to `tmpPathCommitPdf` (see [epFiles()]).
+#'
+#' * If the input file is `.docx`, `.doc`, `.pptx` or `.ppt`, it is converted to PDF.
+#' * Otherwise (`.pdf` / `.png`) the file is simply copied so downstream stages can
+#'   rely on `tmpPathCommitPdf` unconditionally.
+#'
+#' Conversion is dispatched by OS:
+#' * Windows: [convertOfficeToPdfWindows()] (PowerShell + Word/PowerPoint COM automation)
+#' * Linux/macOS: [convertOfficeToPdfLinux()] (`libreoffice --headless --convert-to pdf`)
+#'
+#' @param plotSpec A [plotSpec()]
+#'
+#' @return file.path to pdf/png file suitable for [pngPipelineExtractPage()]
+#' @md
+#' @importFrom tools file_ext
+pngPipelineConvertOfficeToPdf <- function(plotSpec) {
+  files <- do.call(epFiles, plotSpec)
+  fileIn = files$tmpPathCommit
+  fileOut = files$tmpPathCommitPdf
+
+  # Case 1: Nothing to do
+  if (idempotencyNoActionRequired(fileIn = fileIn, fileOut = fileOut, commit = plotSpec$commit)) {
+    return(fileOut)
+  }
+
+  dir.create(dirname(fileOut), showWarnings = FALSE, recursive = TRUE)
+
+  # Case 2: Non-office file - just copy through
+  if (!tolower(tools::file_ext(fileIn)) %in% c("docx", "doc", "pptx", "ppt")) {
+    file.copy(from = fileIn, to = fileOut, overwrite = TRUE)
+    return(fileOut)
+  }
+
+  # Case 3: Office file - convert via OS-specific subfunction
+  if (Sys.info()["sysname"] == "Windows") {
+    convertOfficeToPdfWindows(fileIn = fileIn, fileOut = fileOut)
+  } else {
+    convertOfficeToPdfLinux(fileIn = fileIn, fileOut = fileOut)
+  }
+
+  fileOut
+}
+
+
+#' Convert an Office document to PDF on Windows via PowerShell + COM automation
+#'
+#' Dispatches to Microsoft Word (`.docx`, `.doc`) or PowerPoint (`.pptx`, `.ppt`)
+#' COM automation based on the file extension. Requires Microsoft Office to be
+#' installed. Uses `wdFormatPDF = 17` for Word and `ppSaveAsPDF = 32` for PowerPoint.
+#'
+#' @param fileIn Path to the input Office file
+#' @param fileOut Target path for the PDF output
+#'
+#' @return `fileOut`, invisibly
+#' @md
+#' @importFrom tools file_ext
+convertOfficeToPdfWindows <- function(fileIn, fileOut) {
+  ext <- tolower(tools::file_ext(fileIn))
+  kind <- if (ext %in% c("docx", "doc")) "word" else "powerpoint"
+
+  psScript <- paste(sep = "\n",
+    'param([string]$inPath, [string]$outPath, [string]$kind)',
+    'try {',
+    '  $inFull  = [System.IO.Path]::GetFullPath($inPath)',
+    '  $outFull = [System.IO.Path]::GetFullPath($outPath)',
+    '  $outDir  = [System.IO.Path]::GetDirectoryName($outFull)',
+    '  if ($outDir -and -not (Test-Path -LiteralPath $outDir)) {',
+    '    [System.IO.Directory]::CreateDirectory($outDir) | Out-Null',
+    '  }',
+    '  if ($kind -eq "word") {',
+    '    $app = New-Object -ComObject Word.Application',
+    '    $app.Visible = $false',
+    '    try {',
+    '      $doc = $app.Documents.Open($inFull, $false, $true)',
+    '      # 17 = wdFormatPDF',
+    '      $doc.SaveAs([ref]$outFull, [ref]17)',
+    '    } finally {',
+    '      if ($doc) { $doc.Close([ref]$false) }',
+    '      if ($app) { $app.Quit() }',
+    '    }',
+    '  } else {',
+    '    $app = New-Object -ComObject PowerPoint.Application',
+    '    try {',
+    '      # ReadOnly=$true, Untitled=$true, WithWindow=$false',
+    '      $pres = $app.Presentations.Open($inFull, $true, $true, $false)',
+    '      # 32 = ppSaveAsPDF',
+    '      $pres.SaveAs($outFull, 32)',
+    '    } finally {',
+    '      if ($pres) { $pres.Close() }',
+    '      if ($app) { $app.Quit() }',
+    '    }',
+    '  }',
+    '  Write-Output $outFull',
+    '  exit 0',
+    '} catch {',
+    '  Write-Error $_.Exception.Message',
+    '  exit 3',
+    '}'
+  )
+
+  tmpPs <- tempfile(fileext = ".ps1")
+  writeLines(psScript, con = tmpPs)
+  on.exit(unlink(tmpPs), add = TRUE)
+
+  status <- system2("powershell.exe",
+                    args = c("-NoProfile", "-ExecutionPolicy", "Bypass",
+                             "-File", shQuote(tmpPs),
+                             shQuote(fileIn), shQuote(fileOut), kind))
+  if (!is.null(status) && status != 0) {
+    stop("Office->PDF conversion failed for '", fileIn, "' (exit=", status, ")")
+  }
+
+  invisible(fileOut)
+}
+
+
+#' Convert an Office document to PDF on Linux/macOS via LibreOffice headless
+#'
+#' Uses `libreoffice --headless --convert-to pdf`. LibreOffice writes the pdf
+#' to `--outdir` using the basename of the input, so the produced file is
+#' renamed to `fileOut` afterwards.
+#'
+#' @param fileIn Path to the input Office file
+#' @param fileOut Target path for the PDF output
+#'
+#' @return `fileOut`, invisibly
+#' @md
+#' @importFrom tools file_path_sans_ext
+convertOfficeToPdfLinux <- function(fileIn, fileOut) {
+  outDir <- tempfile("libreoffice-")
+  dir.create(outDir, showWarnings = FALSE, recursive = TRUE)
+  on.exit(unlink(outDir, recursive = TRUE), add = TRUE)
+
+  status <- system2("libreoffice",
+                    args = c("--headless", "--convert-to", "pdf",
+                             "--outdir", shQuote(outDir),
+                             shQuote(fileIn)))
+  if (!is.null(status) && status != 0) {
+    stop("libreoffice conversion failed for '", fileIn, "' (exit=", status, ")")
+  }
+
+  generated <- file.path(outDir, paste0(tools::file_path_sans_ext(basename(fileIn)), ".pdf"))
+  if (!file.exists(generated)) {
+    stop("libreoffice did not produce expected file: ", generated)
+  }
+  file.rename(generated, fileOut)
+  invisible(fileOut)
+}
+
+
 #' Apply the extraction step of the plot preprocessing pipeline
 #'
 #' @param plotSpec A [plotSpec()]
@@ -75,7 +231,7 @@ pngPipelineCheckoutToTemp <- function(plotSpec) {
 pngPipelineExtractPage <- function(plotSpec) {
 
   files <- do.call(epFiles, plotSpec)
-  fileIn = files$tmpPathCommit
+  fileIn = files$tmpPathCommitPdf
   fileOut = files$tmpPathCommitPage
 
   # Case 1: Nothing to do
@@ -310,7 +466,7 @@ parsePlotSpec <- function(text) {
 #'
 #' @returns list of relevant arguments
 parseDiffSpec <- function(ROWID, VALUE, d) {
-  parseData <- getParseData(parse(text = VALUE))
+  parseData <- getParseData(parse(text = VALUE, keep.source = TRUE))
   parseData <- parseData$text[parseData$token == "SYMBOL"]
   parseData <- gsub("`","", parseData)
 

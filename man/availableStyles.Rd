@@ -19,6 +19,7 @@ availableStyles()
 Other UI: 
 \code{\link{compareProjects_excelPlot}()},
 \code{\link{epFiles}()},
+\code{\link{getNPages}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
 \code{\link{plotExcel}()},

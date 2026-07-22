@@ -29,7 +29,7 @@ diffpdf(
 )
 }
 \arguments{
-\item{path}{Path with plots. Will be searched recursively for pdf and png files}
+\item{path}{Path with plots. Will be searched recursively for pdf, png, docx and pptx files}
 
 \item{filename}{File path of the output excel file}
 
@@ -69,6 +69,7 @@ Other UI:
 \code{\link{availableStyles}()},
 \code{\link{compareProjects_excelPlot}()},
 \code{\link{epFiles}()},
+\code{\link{getNPages}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
 \code{\link{plotExcel}()},
@@ -79,6 +80,7 @@ Other UI:
 \code{\link{availableStyles}()},
 \code{\link{compareProjects_excelPlot}()},
 \code{\link{epFiles}()},
+\code{\link{getNPages}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
 \code{\link{plotExcel}()},

@@ -79,7 +79,7 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 
 #' Export all plots in a folder into Excel or diff two pdfs/pngs
 #'
-#' @param path Path with plots. Will be searched recursively for pdf and png files
+#' @param path Path with plots. Will be searched recursively for pdf, png, docx and pptx files
 #' @param filename File path of the output excel file
 #' @param fileSelection Vector of plots to be included. Default: NULL = include all files
 #' @param resolution in dpi
@@ -98,7 +98,6 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 #' @md
 #' @family UI
 #' @importFrom tools file_ext
-#' @importFrom pdftools pdf_length
 #' @importFrom data.table rbindlist
 #' @examples
 #' \dontrun{
@@ -127,13 +126,13 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
   verifyArg(nPagesMax       , expectedMode = "numeric")
 
 
-  # Get basic overview of pdf files and pages
-  pdfFiles <- list.files(path, pattern = "\\.(pdf|png)$", full.names = TRUE, recursive = TRUE)
+  # Get basic overview of plot files and pages
+  pdfFiles <- list.files(path, pattern = "\\.(pdf|png|docx|pptx)$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE)
   if (!is.null(filterRegexpRemove)) pdfFiles <- grep(filterRegexpRemove, pdfFiles, value = TRUE, invert = TRUE)
   pdfFilesWithinProject <- gsub("^/?", "", gsub(paste0("^", path), "", pdfFiles))
 
   dPdfInfo <- lapply(setNames(pdfFiles, nm = pdfFilesWithinProject), function(x) {
-    data.table(nPages = ifelse(tools::file_ext(x) == "pdf", pdftools::pdf_length(x), 1))
+    data.table(nPages = getNPages(x))
   })
   dPdfInfo <- data.table::rbindlist(dPdfInfo, idcol = "pdfFile")
   dPdfInfo
@@ -225,7 +224,7 @@ diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExce
     pdfFilesWithinProject <- pdfFiles
 
     dPdfInfo <- lapply(setNames(pdfFiles, nm = pdfFilesWithinProject), function(x) {
-      data.table(nPages = ifelse(tools::file_ext(x) == "pdf", pdftools::pdf_length(x), 1))
+      data.table(nPages = getNPages(x))
     })
     dPdfInfo <- data.table::rbindlist(dPdfInfo, idcol = "pdfFile")
 

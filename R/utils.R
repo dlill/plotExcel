@@ -154,6 +154,77 @@ resolveLockedFilePath <- function(path) {
 }
 
 
+#' Number of pages / slides of a plot input file, without conversion
+#'
+#' Cheap dispatcher used before the plot pipeline runs so that Office files
+#' don't have to be converted to PDF just to get a page count.
+#'
+#' * `.pdf`  -> [pdftools::pdf_length()]
+#' * `.png`  -> 1
+#' * `.pptx` -> number of `ppt/slides/slide*.xml` entries in the zip container
+#' * `.docx` -> `<Pages>` field parsed from `docProps/app.xml` in the zip
+#'   container (as saved by Word). Falls back to 1 when no such metadata is
+#'   present (e.g. docx files produced by tools other than Word).
+#' * anything else (`.doc`, `.ppt`, ...) -> 1
+#'
+#' @param path Path to a plot input file
+#'
+#' @return Positive integer scalar
+#' @export
+#' @md
+#' @family UI
+#' @importFrom tools file_ext
+#' @importFrom pdftools pdf_length
+getNPages <- function(path) {
+  verifyArg(path, expectedClass = "character", expectedLength = 1)
+  ext <- tolower(tools::file_ext(path))
+  if (ext == "pdf")  return(pdftools::pdf_length(path))
+  if (ext == "png")  return(1L)
+  if (ext == "pptx") return(getNSlidesPptx(path))
+  if (ext == "docx") return(getNPagesDocx(path))
+  1L
+}
+
+
+#' Number of slides in a PPTX file, from its zip container
+#'
+#' Counts entries matching `ppt/slides/slide*.xml`.
+#'
+#' @param path Path to a `.pptx` file
+#'
+#' @return Positive integer scalar
+#' @md
+getNSlidesPptx <- function(path) {
+  entries <- utils::unzip(path, list = TRUE)$Name
+  length(grep("^ppt/slides/slide[0-9]+\\.xml$", entries))
+}
+
+
+#' Number of pages in a DOCX file, from Word-written metadata
+#'
+#' Reads the `<Pages>` value from `docProps/app.xml` in the zip container. That
+#' value is only present if the docx was saved by Word (or another authoring
+#' tool that populates it). Returns 1 otherwise.
+#'
+#' @param path Path to a `.docx` file
+#'
+#' @return Positive integer scalar
+#' @md
+getNPagesDocx <- function(path) {
+  entries <- utils::unzip(path, list = TRUE)$Name
+  if (!"docProps/app.xml" %in% entries) return(1L)
+  exdir <- tempfile("docx-app-")
+  dir.create(exdir, showWarnings = FALSE, recursive = TRUE)
+  on.exit(unlink(exdir, recursive = TRUE), add = TRUE)
+  utils::unzip(path, files = "docProps/app.xml", exdir = exdir)
+  appXml <- paste(readLines(file.path(exdir, "docProps", "app.xml"), warn = FALSE),
+                  collapse = "\n")
+  m <- regmatches(appXml, regexpr("<Pages>[0-9]+</Pages>", appXml))
+  if (!length(m)) return(1L)
+  as.integer(gsub("</?Pages>", "", m))
+}
+
+
 
 
 

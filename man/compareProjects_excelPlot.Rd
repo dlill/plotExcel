@@ -28,6 +28,7 @@ Compare plots of multiple folders with the same folder structure
 Other UI: 
 \code{\link{availableStyles}()},
 \code{\link{epFiles}()},
+\code{\link{getNPages}()},
 \code{\link{parsePlotSpec}()},
 \code{\link{parseTextSpec}()},
 \code{\link{plotExcel}()},
