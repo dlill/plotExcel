@@ -203,25 +203,43 @@ getNSlidesPptx <- function(path) {
 #' Number of pages in a DOCX file, from Word-written metadata
 #'
 #' Reads the `<Pages>` value from `docProps/app.xml` in the zip container. That
-#' value is only present if the docx was saved by Word (or another authoring
-#' tool that populates it). Returns 1 otherwise.
+#' value is only present (and reliable) if the docx was saved by Word after a full
+#' rendering. When the metadata is missing or reports `1` (which is often stale for
+#' multi-page docs that were never opened in Word), we fall back to a headless
+#' Office->PDF conversion and count pages with `pdftools::pdf_length()`.
 #'
 #' @param path Path to a `.docx` file
 #'
 #' @return Positive integer scalar
 #' @md
 getNPagesDocx <- function(path) {
+  # Fast path: trust the <Pages> metadata only when Word wrote a plausibly
+  # rendered value (>= 2). Values of 1 (or missing) are unreliable for docx
+  # files that were generated programmatically or never opened/saved by Word.
   entries <- utils::unzip(path, list = TRUE)$Name
-  if (!"docProps/app.xml" %in% entries) return(1L)
-  exdir <- tempfile("docx-app-")
-  dir.create(exdir, showWarnings = FALSE, recursive = TRUE)
-  on.exit(unlink(exdir, recursive = TRUE), add = TRUE)
-  utils::unzip(path, files = "docProps/app.xml", exdir = exdir)
-  appXml <- paste(readLines(file.path(exdir, "docProps", "app.xml"), warn = FALSE),
-                  collapse = "\n")
-  m <- regmatches(appXml, regexpr("<Pages>[0-9]+</Pages>", appXml))
-  if (!length(m)) return(1L)
-  as.integer(gsub("</?Pages>", "", m))
+  if ("docProps/app.xml" %in% entries) {
+    exdir <- tempfile("docx-app-")
+    dir.create(exdir, showWarnings = FALSE, recursive = TRUE)
+    utils::unzip(path, files = "docProps/app.xml", exdir = exdir)
+    appXml <- paste(readLines(file.path(exdir, "docProps", "app.xml"), warn = FALSE),
+                    collapse = "\n")
+    unlink(exdir, recursive = TRUE)
+    m <- regmatches(appXml, regexpr("<Pages>[0-9]+</Pages>", appXml))
+    if (length(m)) {
+      n <- as.integer(gsub("</?Pages>", "", m))
+      if (!is.na(n) && n >= 2) return(n)
+    }
+  }
+
+  # Fallback: convert to a temporary PDF and count pages from it
+  tmpPdf <- tempfile(fileext = ".pdf")
+  on.exit(unlink(tmpPdf), add = TRUE)
+  if (Sys.info()["sysname"] == "Windows") {
+    convertOfficeToPdfWindows(fileIn = path, fileOut = tmpPdf)
+  } else {
+    convertOfficeToPdfLinux(fileIn = path, fileOut = tmpPdf)
+  }
+  pdftools::pdf_length(tmpPdf)
 }
 
 
