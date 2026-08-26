@@ -2,6 +2,7 @@
 
 export(availableStyles)
 export(compareProjects_excelPlot)
+export(convertOfficeToPdf)
 export(diffpdf)
 export(epFiles)
 export(getNPages)

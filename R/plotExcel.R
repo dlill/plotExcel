@@ -1,6 +1,6 @@
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 # Excel export pipeline ----
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 
 #' Export plots into an Excel table.
 #'
@@ -12,6 +12,8 @@
 #' @param headerRowStyle Default: "center". Style used for header row.
 #' @param FLAGaddBorders Default: FALSE. Add borders around all cells?
 #' @param FLAGpdf Default: FALSE. Export Excel as pdf and open in pdf viewer? Useful for quick drafting.
+#' @param pdfPageSize PDF pagination mode: `"single"` fits the worksheet to one
+#'   page; `"A4"` splits it across A4 pages.
 #' @param textColWidth Default: 5. Width of pure text columns, in cm.
 #' @param FLAGopenExcel Default: FALSE. Open Excel after export?
 #' @param FLAGtemp Default: FALSE. Write to a temporary file?
@@ -47,25 +49,26 @@
 #' unlink(filename)
 #' }
 plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = FALSE, FLAGpdf = FALSE, textColWidth = 5,
-                      FLAGopenExcel = FALSE, FLAGtemp = FALSE) {
+                      FLAGopenExcel = FALSE, FLAGtemp = FALSE, pdfPageSize = c("single", "A4")) {
 
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   # Input verification ----
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   mf <- missing(filename)
   if (mf & !FLAGtemp) stop("filename can't be missing when FLAGtemp == FALSE")
+  pdfPageSize <- match.arg(pdfPageSize)
   if (FLAGtemp) {
     filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
   }
 
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   # Crunch ----
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   dParsed <- parseTable(d, headerRowStyle)
 
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   # Handle plots ----
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   # Apply extraction and cropping pipeline
   lapply(dParsed[ISPLOT == TRUE, SPEC], applyPngPipelineOnePage)
 
@@ -91,17 +94,17 @@ plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = F
   dheights <- dParsed[,list(HEIGHTCM = max(HEIGHTCM, na.rm = TRUE)), by = "ROWID"]
   dheights[!is.finite(HEIGHTCM),`:=`(HEIGHTCM = 2)]
 
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   # Populate the Excel ----
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   wb <- populateExcel(dParsed = dParsed,
                       dwidths = dwidths,
                       dheights = dheights,
                       FLAGaddBorders = FLAGaddBorders)
 
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   # Export ----
-  # -------------------------------------------------------------------------#
+  # ------------------------------------------------------------------------- #
   if (!dir.exists(dirname(filename))) {dir.create(dirname(filename), showWarnings = FALSE, recursive = TRUE)}
   filename <- resolveLockedFilePath(filename)
   t0 <- Sys.time()
@@ -110,9 +113,9 @@ plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = F
   message("List available text styles with `availableStyles()`.")
 
   if (FLAGpdf) {
-    system(paste0('LD_LIBRARY_PATH="/usr/lib/libreoffice/program:/usr/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH" && ',
-                  'export LD_LIBRARY_PATH && ', "bash -lic 'libreoffice --headless --convert-to pdf ",normalizePath(filename), " --outdir ", tempdir(), " ", normalizePath(filename), "'"), wait = TRUE)
-    system(paste0("evince ", file.path(tempdir(), paste0(tools::file_path_sans_ext(basename(filename)), ".pdf"))), wait = FALSE)
+    pdfFilename <- file.path(tempdir(), paste0(tools::file_path_sans_ext(basename(filename)), ".pdf"))
+    convertOfficeToPdf(fileIn = filename, fileOut = pdfFilename, pageSize = pdfPageSize)
+    utils::browseURL(pdfFilename)
   }
 
   if (FLAGopenExcel) {shell.exec(normalizePath(filename))}
@@ -224,9 +227,9 @@ populateExcel <- function(dParsed, dwidths, dheights, FLAGaddBorders) {
   wb
 }
 
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 # Excel cell styles ----
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 
 styleList <- list(
   left          = openxlsx::createStyle(fontSize = 18, wrapText = TRUE, textDecoration = "bold", halign = NULL, valign = NULL),

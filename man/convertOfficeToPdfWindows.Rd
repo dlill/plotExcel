@@ -4,18 +4,20 @@
 \alias{convertOfficeToPdfWindows}
 \title{Convert an Office document to PDF on Windows via PowerShell + COM automation}
 \usage{
-convertOfficeToPdfWindows(fileIn, fileOut)
+convertOfficeToPdfWindows(fileIn, fileOut, pageSize = c("single", "A4"))
 }
 \arguments{
 \item{fileIn}{Path to the input Office file}
 
 \item{fileOut}{Target path for the PDF output}
+
+\item{pageSize}{Excel pagination mode; see \code{\link[=convertOfficeToPdf]{convertOfficeToPdf()}}.}
 }
 \value{
 \code{fileOut}, invisibly
 }
 \description{
-Dispatches to Microsoft Word (\code{.docx}, \code{.doc}) or PowerPoint (\code{.pptx}, \code{.ppt})
-COM automation based on the file extension. Requires Microsoft Office to be
-installed. Uses \code{wdFormatPDF = 17} for Word and \code{ppSaveAsPDF = 32} for PowerPoint.
+Dispatches to Microsoft Word (\code{.docx}, \code{.doc}), PowerPoint (\code{.pptx}, \code{.ppt})
+or Excel (\code{.xlsx}, \code{.xlsm}, \code{.xls}) COM automation based on the file
+extension. Requires Microsoft Office to be installed.
 }

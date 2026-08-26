@@ -1,9 +1,11 @@
 # excelPlot 0.2.3
 
-* Add support for DOCX and PPTX plot inputs in the preprocessing pipeline by converting to PDF first via a new `pngPipelineConvertOfficeToPdf` stage.
+* Add support for DOCX, PPTX, and Excel plot inputs in the preprocessing pipeline by converting to PDF first via a new `pngPipelineConvertOfficeToPdf` stage.
 * Conversion backends:
-    * Windows: Office COM automation via PowerShell (`Word.Application` and `PowerPoint.Application`)
+    * Windows: Office COM automation via PowerShell (`Word.Application`, `PowerPoint.Application`, and `Excel.Application`)
     * Linux/macOS: headless LibreOffice (`libreoffice --headless --convert-to pdf`)
+* Add `convertOfficeToPdf()` with `single` and `A4` Excel pagination modes.
+* Make `plotExcel(FLAGpdf = TRUE)` cross-platform.
 * `plotExcelFolder()` now discovers `docx` and `pptx` files in addition to `pdf` and `png`.
 
 # excelPlot 0.2.2

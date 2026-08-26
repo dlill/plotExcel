@@ -12,7 +12,8 @@ plotExcel(
   FLAGpdf = FALSE,
   textColWidth = 5,
   FLAGopenExcel = FALSE,
-  FLAGtemp = FALSE
+  FLAGtemp = FALSE,
+  pdfPageSize = c("single", "A4")
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ Visual diffing of two plots is done by \code{"diff(colname1,colname2)"}, see exa
 \item{FLAGopenExcel}{Default: FALSE. Open Excel after export?}
 
 \item{FLAGtemp}{Default: FALSE. Write to a temporary file?}
+
+\item{pdfPageSize}{PDF pagination mode: \code{"single"} fits the worksheet to one
+page; \code{"A4"} splits it across A4 pages.}
 }
 \value{
 \code{filename}, but is called for its side effect.

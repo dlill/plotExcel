@@ -1,6 +1,6 @@
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 # PNG Pipeline ----
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 
 
 #' Apply the plot preprocessing pipeline
@@ -73,12 +73,13 @@ pngPipelineCheckoutToTemp <- function(plotSpec) {
 #' Second stage of the plot preprocessing pipeline. Runs on the file produced by
 #' [pngPipelineCheckoutToTemp()] and writes to `tmpPathCommitPdf` (see [epFiles()]).
 #'
-#' * If the input file is `.docx`, `.doc`, `.pptx` or `.ppt`, it is converted to PDF.
+#' * If the input file is `.docx`, `.doc`, `.pptx`, `.ppt`, `.xlsx`, `.xlsm`
+#'   or `.xls`, it is converted to PDF.
 #' * Otherwise (`.pdf` / `.png`) the file is simply copied so downstream stages can
 #'   rely on `tmpPathCommitPdf` unconditionally.
 #'
 #' Conversion is dispatched by OS:
-#' * Windows: [convertOfficeToPdfWindows()] (PowerShell + Word/PowerPoint COM automation)
+#' * Windows: [convertOfficeToPdfWindows()] (PowerShell + Office COM automation)
 #' * Linux/macOS: [convertOfficeToPdfLinux()] (`libreoffice --headless --convert-to pdf`)
 #'
 #' @param plotSpec A [plotSpec()]
@@ -99,40 +100,95 @@ pngPipelineConvertOfficeToPdf <- function(plotSpec) {
   dir.create(dirname(fileOut), showWarnings = FALSE, recursive = TRUE)
 
   # Case 2: Non-office file - just copy through
-  if (!tolower(tools::file_ext(fileIn)) %in% c("docx", "doc", "pptx", "ppt")) {
+  if (!tolower(tools::file_ext(fileIn)) %in% c("docx", "doc", "pptx", "ppt", "xlsx", "xlsm", "xls")) {
     file.copy(from = fileIn, to = fileOut, overwrite = TRUE)
     return(fileOut)
   }
 
   # Case 3: Office file - convert via OS-specific subfunction
-  if (Sys.info()["sysname"] == "Windows") {
-    convertOfficeToPdfWindows(fileIn = fileIn, fileOut = fileOut)
-  } else {
-    convertOfficeToPdfLinux(fileIn = fileIn, fileOut = fileOut)
-  }
+  convertOfficeToPdf(fileIn = fileIn, fileOut = fileOut)
 
   fileOut
 }
 
 
+#' Convert an Office document to PDF
+#'
+#' Supports Word, PowerPoint and Excel documents. Excel workbooks can either
+#' be fitted to one PDF page per worksheet or printed at full scale across A4
+#' pages. Word and PowerPoint documents retain their native page layout.
+#'
+#' @param fileIn Path to the input Office file.
+#' @param fileOut Target path for the PDF output.
+#' @param pageSize Excel pagination mode: `"single"` fits each worksheet to one
+#'   PDF page; `"A4"` prints worksheets at 100 percent scale on A4 pages.
+#'
+#' @return `fileOut`, invisibly.
+#' @export
+#' @md
+#' @importFrom tools file_ext
+#'
+#' @examples
+#' \dontrun{
+#' fileIn <- system.file("exampleData/plots.xlsx", package = "excelPlot")
+#' fileOut <- tempfile(fileext = ".pdf")
+#' convertOfficeToPdf(fileIn, fileOut, pageSize = "single")
+#' unlink(fileOut)
+#' }
+convertOfficeToPdf <- function(fileIn, fileOut, pageSize = c("single", "A4")) {
+  pageSize <- match.arg(pageSize)
+  if (!file.exists(fileIn)) {
+    stop("Input file does not exist: ", fileIn)
+  }
+  ext <- tolower(tools::file_ext(fileIn))
+  supported <- c("docx", "doc", "pptx", "ppt", "xlsx", "xlsm", "xls")
+  if (!ext %in% supported) {
+    stop("Unsupported Office file extension: .", ext)
+  }
+
+  dir.create(dirname(fileOut), showWarnings = FALSE, recursive = TRUE)
+  if (file.exists(fileOut)) unlink(fileOut)
+  if (Sys.info()["sysname"] == "Windows") {
+    convertOfficeToPdfWindows(fileIn = fileIn, fileOut = fileOut, pageSize = pageSize)
+  } else {
+    convertOfficeToPdfLinux(fileIn = fileIn, fileOut = fileOut, pageSize = pageSize)
+  }
+
+  if (!file.exists(fileOut)) {
+    stop("Office conversion did not produce expected file: ", fileOut)
+  }
+  invisible(fileOut)
+}
+
+
 #' Convert an Office document to PDF on Windows via PowerShell + COM automation
 #'
-#' Dispatches to Microsoft Word (`.docx`, `.doc`) or PowerPoint (`.pptx`, `.ppt`)
-#' COM automation based on the file extension. Requires Microsoft Office to be
-#' installed. Uses `wdFormatPDF = 17` for Word and `ppSaveAsPDF = 32` for PowerPoint.
+#' Dispatches to Microsoft Word (`.docx`, `.doc`), PowerPoint (`.pptx`, `.ppt`)
+#' or Excel (`.xlsx`, `.xlsm`, `.xls`) COM automation based on the file
+#' extension. Requires Microsoft Office to be installed.
 #'
 #' @param fileIn Path to the input Office file
 #' @param fileOut Target path for the PDF output
+#' @param pageSize Excel pagination mode; see [convertOfficeToPdf()].
 #'
 #' @return `fileOut`, invisibly
 #' @md
 #' @importFrom tools file_ext
-convertOfficeToPdfWindows <- function(fileIn, fileOut) {
+convertOfficeToPdfWindows <- function(fileIn, fileOut, pageSize = c("single", "A4")) {
+  pageSize <- match.arg(pageSize)
   ext <- tolower(tools::file_ext(fileIn))
-  kind <- if (ext %in% c("docx", "doc")) "word" else "powerpoint"
+  kind <- if (ext %in% c("docx", "doc")) {
+    "word"
+  } else if (ext %in% c("pptx", "ppt")) {
+    "powerpoint"
+  } else if (ext %in% c("xlsx", "xlsm", "xls")) {
+    "excel"
+  } else {
+    stop("Unsupported Office file extension: .", ext)
+  }
 
   psScript <- paste(sep = "\n",
-    'param([string]$inPath, [string]$outPath, [string]$kind)',
+    'param([string]$inPath, [string]$outPath, [string]$kind, [string]$pageSize)',
     'try {',
     '  $inFull  = [System.IO.Path]::GetFullPath($inPath)',
     '  $outFull = [System.IO.Path]::GetFullPath($outPath)',
@@ -151,7 +207,7 @@ convertOfficeToPdfWindows <- function(fileIn, fileOut) {
     '      if ($doc) { $doc.Close([ref]$false) }',
     '      if ($app) { $app.Quit() }',
     '    }',
-    '  } else {',
+    '  } elseif ($kind -eq "powerpoint") {',
     '    $app = New-Object -ComObject PowerPoint.Application',
     '    try {',
     '      # ReadOnly=$true, Untitled=$true, WithWindow=$false',
@@ -160,6 +216,29 @@ convertOfficeToPdfWindows <- function(fileIn, fileOut) {
     '      $pres.SaveAs($outFull, 32)',
     '    } finally {',
     '      if ($pres) { $pres.Close() }',
+    '      if ($app) { $app.Quit() }',
+    '    }',
+    '  } else {',
+    '    $app = New-Object -ComObject Excel.Application',
+    '    $app.Visible = $false',
+    '    $app.DisplayAlerts = $false',
+    '    try {',
+    '      $book = $app.Workbooks.Open($inFull, 0, $true)',
+    '      foreach ($sheet in $book.Worksheets) {',
+    '        $sheet.PageSetup.PaperSize = 9  # xlPaperA4',
+    '        if ($pageSize -eq "single") {',
+    '          $sheet.PageSetup.Zoom = $false',
+    '          $sheet.PageSetup.FitToPagesWide = 1',
+    '          $sheet.PageSetup.FitToPagesTall = 1',
+    '        } else {',
+    '          $sheet.PageSetup.Zoom = 100',
+    '          $sheet.PageSetup.FitToPagesWide = $false',
+    '          $sheet.PageSetup.FitToPagesTall = $false',
+    '        }',
+    '      }',
+    '      $book.ExportAsFixedFormat(0, $outFull)  # 0 = xlTypePDF',
+    '    } finally {',
+    '      if ($book) { $book.Close($false) }',
     '      if ($app) { $app.Quit() }',
     '    }',
     '  }',
@@ -178,7 +257,7 @@ convertOfficeToPdfWindows <- function(fileIn, fileOut) {
   status <- system2("powershell.exe",
                     args = c("-NoProfile", "-ExecutionPolicy", "Bypass",
                              "-File", shQuote(tmpPs),
-                             shQuote(fileIn), shQuote(fileOut), kind))
+                             shQuote(fileIn), shQuote(fileOut), kind, pageSize))
   if (!is.null(status) && status != 0) {
     stop("Office->PDF conversion failed for '", fileIn, "' (exit=", status, ")")
   }
@@ -195,11 +274,53 @@ convertOfficeToPdfWindows <- function(fileIn, fileOut) {
 #'
 #' @param fileIn Path to the input Office file
 #' @param fileOut Target path for the PDF output
+#' @param pageSize Excel pagination mode; see [convertOfficeToPdf()].
 #'
 #' @return `fileOut`, invisibly
 #' @md
 #' @importFrom tools file_path_sans_ext
-convertOfficeToPdfLinux <- function(fileIn, fileOut) {
+convertOfficeToPdfLinux <- function(fileIn, fileOut, pageSize = c("single", "A4")) {
+  pageSize <- match.arg(pageSize)
+  ext <- tolower(tools::file_ext(fileIn))
+  excelExt <- c("xlsx", "xlsm", "xls")
+  if (!ext %in% c("docx", "doc", "pptx", "ppt", excelExt)) {
+    stop("Unsupported Office file extension: .", ext)
+  }
+
+  if (ext == "xls") {
+    xlsxDir <- tempfile("libreoffice-xlsx-")
+    dir.create(xlsxDir, showWarnings = FALSE, recursive = TRUE)
+    on.exit(unlink(xlsxDir, recursive = TRUE), add = TRUE)
+    status <- system2("libreoffice",
+                      args = c("--headless", "--convert-to", "xlsx",
+                               "--outdir", shQuote(xlsxDir), shQuote(fileIn)))
+    if (!is.null(status) && status != 0) {
+      stop("libreoffice conversion to xlsx failed for '", fileIn, "' (exit=", status, ")")
+    }
+    fileIn <- file.path(xlsxDir, paste0(tools::file_path_sans_ext(basename(fileIn)), ".xlsx"))
+    if (!file.exists(fileIn)) {
+      stop("libreoffice did not produce expected file: ", fileIn)
+    }
+  }
+
+  if (ext %in% excelExt) {
+    wb <- openxlsx::loadWorkbook(fileIn)
+    for (sheet in names(wb)) {
+      openxlsx::pageSetup(
+        wb = wb,
+        sheet = sheet,
+        paperSize = 9,
+        scale = 100,
+        fitToWidth = pageSize == "single",
+        fitToHeight = pageSize == "single"
+      )
+    }
+    preparedFile <- tempfile(fileext = ".xlsx")
+    openxlsx::saveWorkbook(wb = wb, file = preparedFile, overwrite = TRUE)
+    on.exit(unlink(preparedFile), add = TRUE)
+    fileIn <- preparedFile
+  }
+
   outDir <- tempfile("libreoffice-")
   dir.create(outDir, showWarnings = FALSE, recursive = TRUE)
   on.exit(unlink(outDir, recursive = TRUE), add = TRUE)
@@ -360,9 +481,9 @@ idempotencyNoActionRequired <- function(fileIn, fileOut, commit, fileIn2 = NULL)
 
 
 
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 # PlotSpec ----
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 
 #' Collect all options for plot preprocessing in a list
 #'
@@ -452,9 +573,9 @@ parsePlotSpec <- function(text) {
 }
 
 
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 # Diff ----
-# -------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 
 #' Parse the diff spec
 #'

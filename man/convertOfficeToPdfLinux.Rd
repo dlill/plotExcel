@@ -4,12 +4,14 @@
 \alias{convertOfficeToPdfLinux}
 \title{Convert an Office document to PDF on Linux/macOS via LibreOffice headless}
 \usage{
-convertOfficeToPdfLinux(fileIn, fileOut)
+convertOfficeToPdfLinux(fileIn, fileOut, pageSize = c("single", "A4"))
 }
 \arguments{
 \item{fileIn}{Path to the input Office file}
 
 \item{fileOut}{Target path for the PDF output}
+
+\item{pageSize}{Excel pagination mode; see \code{\link[=convertOfficeToPdf]{convertOfficeToPdf()}}.}
 }
 \value{
 \code{fileOut}, invisibly

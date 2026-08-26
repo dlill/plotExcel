@@ -18,14 +18,15 @@ Second stage of the plot preprocessing pipeline. Runs on the file produced by
 }
 \details{
 \itemize{
-\item If the input file is \code{.docx}, \code{.doc}, \code{.pptx} or \code{.ppt}, it is converted to PDF.
+\item If the input file is \code{.docx}, \code{.doc}, \code{.pptx}, \code{.ppt}, \code{.xlsx}, \code{.xlsm}
+or \code{.xls}, it is converted to PDF.
 \item Otherwise (\code{.pdf} / \code{.png}) the file is simply copied so downstream stages can
 rely on \code{tmpPathCommitPdf} unconditionally.
 }
 
 Conversion is dispatched by OS:
 \itemize{
-\item Windows: \code{\link[=convertOfficeToPdfWindows]{convertOfficeToPdfWindows()}} (PowerShell + Word/PowerPoint COM automation)
+\item Windows: \code{\link[=convertOfficeToPdfWindows]{convertOfficeToPdfWindows()}} (PowerShell + Office COM automation)
 \item Linux/macOS: \code{\link[=convertOfficeToPdfLinux]{convertOfficeToPdfLinux()}} (\verb{libreoffice --headless --convert-to pdf})
 }
 }
