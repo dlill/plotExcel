@@ -79,7 +79,8 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 
 #' Export all plots in a folder into Excel
 #'
-#' @param path Path with plots. Will be searched recursively for pdf, png, docx and pptx files
+#' @param path Path with plots. Will be searched recursively for pdf, png, docx,
+#'   pptx, and xlsx files.
 #' @param filename File path of the output excel file
 #' @param fileSelection Vector of plots to be included. Default: NULL = include all files
 #' @param resolution in dpi
@@ -109,24 +110,20 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
                             ) {
 
 
-  mf <- missing(filename)
-  sf <- substitute(filename)
-  if (!FLAGtemp & !mf) {
-    # If print is wanted
-    deparsedfilename <- deparse(sf)
-  } else {
-    filename <- resolveTempFilename()
-    deparsedfilename <- deparse(filename)
-  }
+  wrapperArguments <- resolveWrapperArguments(filename, substitute(filename), FLAGtemp, CFLAGLayout)
+  filename <- wrapperArguments$filename
+  deparsedfilename <- wrapperArguments$deparsedFilename
+  mf <- wrapperArguments$filenameMissing
+  CFLAGLayout <- wrapperArguments$CFLAGLayout
   verifyArg(fileSelection   , expectedMode = "character", allowNull = TRUE)
-  CFLAGLayout <- match.arg(CFLAGLayout)
   verifyArg(FLAGopenExcel   , expectedMode = "logical")
   verifyArg(FLAGtemp        , expectedMode = "logical")
   verifyArg(nPagesMax       , expectedMode = "numeric")
 
 
   # Get basic overview of plot files and pages
-  pdfFiles <- list.files(path, pattern = "\\.(pdf|png|docx|pptx)$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE)
+  plotFilePattern <- paste0("\\.(", paste(SUPPORTED_PLOT_EXTENSIONS, collapse = "|"), ")$")
+  pdfFiles <- list.files(path, pattern = plotFilePattern, full.names = TRUE, recursive = TRUE, ignore.case = TRUE)
   if (!is.null(filterRegexpRemove)) pdfFiles <- grep(filterRegexpRemove, pdfFiles, value = TRUE, invert = TRUE)
   pdfFilesWithinProject <- gsub("^/?", "", gsub(paste0("^", path), "", pdfFiles))
 
@@ -178,19 +175,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
     return(dPdfInfo)
   }
   if (CFLAGLayout == "insert") {
-    e <- rstudioapi::getSourceEditorContext()
-    rstudioapi::documentSave(id = e$id)
-    row <- e$selection[[1]]$range$end[1]
-
-    codeToInsert <- paste0(c(paste0("dLayout <- ", RSAddins::outputMdTable2(dPdfInfo)),
-                             "",
-                             paste0("plotExcel::plotExcel(d = dLayout, filename = ", deparsedfilename, ", textColWidth = 10)"),
-                             "\n"),
-                           collapse = "\n")
-
-    rstudioapi::insertText(location = rstudioapi::document_position(row, 1), text = codeToInsert, e$id)
-    rstudioapi::documentSave(id = e$id)
-    return(invisible(dPdfInfo))
+    return(insertLayoutCode(dPdfInfo, deparsedfilename))
   }
 
   # Export
@@ -235,16 +220,10 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
 #' }
 plotExcelDiff <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE,
                           skip1 = NULL, skip2 = NULL, CFLAGLayout = c("no", "return", "insert")) {
-    mf <- missing(filename)
-    sf <- substitute(filename)
-    if (!FLAGtemp & !mf) {
-      # If print is wanted
-      deparsedfilename <- deparse(sf)
-    } else {
-      filename <- resolveTempFilename()
-      deparsedfilename <- deparse(filename)
-    }
-    CFLAGLayout <- match.arg(CFLAGLayout)
+    wrapperArguments <- resolveWrapperArguments(filename, substitute(filename), FLAGtemp, CFLAGLayout)
+    filename <- wrapperArguments$filename
+    deparsedfilename <- wrapperArguments$deparsedFilename
+    CFLAGLayout <- wrapperArguments$CFLAGLayout
     verifyArg(FLAGopenExcel   , expectedMode = "logical")
     verifyArg(FLAGtemp        , expectedMode = "logical")
     verifyArg(skip1           , expectedMode = "numeric", allowNull = TRUE)
@@ -292,19 +271,7 @@ plotExcelDiff <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGop
       return(dPdfInfo)
     }
     if (CFLAGLayout == "insert") {
-      e <- rstudioapi::getSourceEditorContext()
-      rstudioapi::documentSave(id = e$id)
-      row <- e$selection[[1]]$range$end[1]
-
-      codeToInsert <- paste0(c(paste0("dLayout <- ", RSAddins::outputMdTable2(dPdfInfo)),
-                               "",
-                               paste0("plotExcel::plotExcel(d = dLayout, filename = ", deparsedfilename, ", textColWidth = 10)"),
-                               "\n"),
-                             collapse = "\n")
-
-      rstudioapi::insertText(location = rstudioapi::document_position(row, 1), text = codeToInsert, e$id)
-      rstudioapi::documentSave(id = e$id)
-      return(invisible(dPdfInfo))
+      return(insertLayoutCode(dPdfInfo, deparsedfilename))
     }
 
 

@@ -1,5 +1,8 @@
 
 
+SUPPORTED_PLOT_EXTENSIONS <- c("pdf", "png", "docx", "pptx", "xlsx")
+
+
 #' Resolve a temporary output filename
 #'
 #' @param ext File extension without a leading dot.
@@ -12,6 +15,61 @@ resolveTempFilename <- function(ext = "xlsx") {
   if (!dir.exists(baseDir)) baseDir <- path.expand("~/")
 
   file.path(baseDir, paste0("tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"), ".", ext))
+}
+
+
+#' Resolve shared wrapper arguments
+#'
+#' @param filename Output filename, which may be missing.
+#' @param filenameExpression Unevaluated filename expression for inserted code.
+#' @param FLAGtemp Whether to use an automatically generated output filename.
+#' @param CFLAGLayout Requested layout handling mode.
+#'
+#' @return A list containing the resolved filename, its code representation,
+#'   whether it was missing, and the matched layout mode.
+#' @md
+resolveWrapperArguments <- function(filename, filenameExpression, FLAGtemp, CFLAGLayout) {
+  filenameMissing <- missing(filename)
+  if (FLAGtemp || filenameMissing) {
+    filename <- resolveTempFilename()
+    filenameExpression <- filename
+  }
+
+  list(
+    filename = filename,
+    deparsedFilename = deparse(filenameExpression),
+    filenameMissing = filenameMissing,
+    CFLAGLayout = match.arg(CFLAGLayout, c("no", "return", "insert"))
+  )
+}
+
+
+#' Insert an Excel layout into the active RStudio script
+#'
+#' @param dLayout Layout data.table to insert.
+#' @param deparsedFilename Code representation of the output filename.
+#'
+#' @return `dLayout`, invisibly.
+#' @md
+insertLayoutCode <- function(dLayout, deparsedFilename) {
+  editorContext <- rstudioapi::getSourceEditorContext()
+  rstudioapi::documentSave(id = editorContext$id)
+  row <- editorContext$selection[[1]]$range$end[1]
+
+  codeToInsert <- paste0(c(
+    paste0("dLayout <- ", RSAddins::outputMdTable2(dLayout)),
+    "",
+    paste0("plotExcel::plotExcel(d = dLayout, filename = ", deparsedFilename, ", textColWidth = 10)"),
+    "\n"
+  ), collapse = "\n")
+
+  rstudioapi::insertText(
+    location = rstudioapi::document_position(row, 1),
+    text = codeToInsert,
+    id = editorContext$id
+  )
+  rstudioapi::documentSave(id = editorContext$id)
+  invisible(dLayout)
 }
 
 
