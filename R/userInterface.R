@@ -110,7 +110,8 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
                             ) {
 
 
-  message("Supported file types: ", paste(SUPPORTED_PLOT_EXTENSIONS, collapse = ", "))
+  folderPlotExtensions <- setdiff(SUPPORTED_PLOT_EXTENSIONS, "xlsx")
+  message("Supported file types: ", paste(folderPlotExtensions, collapse = ", "))
   wrapperArguments <- resolveWrapperArguments(filename, substitute(filename), FLAGtemp, CFLAGLayout)
   filename <- wrapperArguments$filename
   deparsedfilename <- wrapperArguments$deparsedFilename
@@ -123,7 +124,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
 
 
   # Get basic overview of plot files and pages
-  plotFilePattern <- paste0("\\.(", paste(SUPPORTED_PLOT_EXTENSIONS, collapse = "|"), ")$")
+  plotFilePattern <- paste0("\\.(", paste(folderPlotExtensions, collapse = "|"), ")$")
   pdfFiles <- list.files(path, pattern = plotFilePattern, full.names = TRUE, recursive = TRUE, ignore.case = TRUE)
   if (!is.null(filterRegexpRemove)) pdfFiles <- grep(filterRegexpRemove, pdfFiles, value = TRUE, invert = TRUE)
   pdfFilesWithinProject <- gsub("^/?", "", gsub(paste0("^", path), "", pdfFiles))
