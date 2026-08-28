@@ -80,7 +80,7 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 #' Export all plots in a folder into Excel
 #'
 #' @param path Path with plots. Will be searched recursively for pdf, png, docx,
-#'   and pptx files.
+#'   pptx, html, and htm files.
 #' @param filename File path of the output excel file
 #' @param fileSelection Vector of plots to be included. Default: NULL = include all files
 #' @param resolution in dpi

@@ -35,6 +35,7 @@ test_that("plotExcelFolder excludes xlsx outputs from returned layouts", {
   )
 
   expect_true("xlsx" %in% SUPPORTED_PLOT_EXTENSIONS)
+  expect_true(all(c("html", "htm") %in% SUPPORTED_PLOT_EXTENSIONS))
   expect_true(any(grepl("Supported.*pdf.*png.*docx.*pptx", messages)))
   expect_false(any(grepl("\\.xlsx::", layout$Plot, ignore.case = TRUE)))
 })

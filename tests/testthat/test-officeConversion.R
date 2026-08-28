@@ -44,3 +44,40 @@ test_that("Excel inputs use a PDF intermediate in the PNG pipeline", {
 
   expect_equal(tools::file_ext(files$tmpPathCommitPdf), "pdf")
 })
+
+test_that("HTML inputs use the HTML converter and a PDF intermediate", {
+  fileIn <- system.file("exampleData/31-html.html", package = "plotExcel")
+  skip_if(!nzchar(fileIn), "example HTML data not installed")
+
+  plotSpec <- plotSpec(fileIn)
+  files <- do.call(epFiles, plotSpec)
+  converted <- NULL
+  local_mocked_bindings(
+    convertHTMLToPdf = function(fileIn, fileOut) {
+      converted <<- c(fileIn, fileOut)
+      file.create(fileOut)
+      invisible(fileOut)
+    },
+    .package = "plotExcel"
+  )
+
+  pngPipelineCheckoutToTemp(plotSpec)
+  expect_equal(pngPipelineConvertExternalFormats(plotSpec), files$tmpPathCommitPdf)
+  expect_equal(converted, c(files$tmpPathCommit, files$tmpPathCommitPdf))
+  expect_equal(tools::file_ext(files$tmpPathCommitPdf), "pdf")
+})
+
+test_that("convertHTMLToPdf validates its inputs", {
+  expect_error(
+    convertHTMLToPdf("does-not-exist.html", tempfile(fileext = ".pdf")),
+    "Input file does not exist"
+  )
+
+  input <- tempfile(fileext = ".txt")
+  writeLines("not an HTML document", input)
+  on.exit(unlink(input), add = TRUE)
+  expect_error(
+    convertHTMLToPdf(input, tempfile(fileext = ".pdf")),
+    "Unsupported HTML file extension"
+  )
+})

@@ -1,5 +1,6 @@
 # plotExcel 1.0.0
 
+* Add HTML plot support by rendering `.html` and `.htm` files to PDF with `pagedown::chrome_print()`.
 * Rename the package from `excelPlot` to `plotExcel`.
 * Rename `diffpdf()` to `plotExcelDiff()` and remove the pre-1.0 name.
 * Keep the public API focused by making low-level file and page helpers internal.

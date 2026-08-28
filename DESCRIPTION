@@ -21,6 +21,7 @@ Imports:
     tools,
     git2r,
     pdftools,
+    pagedown,
     magick,
     stats
 Suggests: 
