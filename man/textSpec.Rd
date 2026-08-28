@@ -21,15 +21,14 @@ Collect all text specification in a list
 textSpec(text = "Text 1", style = "rotateUp")
 }
 \seealso{
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{epFiles}()},
-\code{\link{getNPages}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotExcelFolder}()},
-\code{\link{plotSpec}()}
+Other UI:
+\code{\link[=availableStyles]{availableStyles()}},
+\code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
+\code{\link[=parsePlotSpec]{parsePlotSpec()}},
+\code{\link[=parseTextSpec]{parseTextSpec()}},
+\code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotExcelDiff]{plotExcelDiff()}},
+\code{\link[=plotExcelFolder]{plotExcelFolder()}},
+\code{\link[=plotSpec]{plotSpec()}}
 }
 \concept{UI}

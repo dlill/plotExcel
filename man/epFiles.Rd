@@ -36,19 +36,6 @@ List of paths to the respective files
 Construct all temp plot file names from a plotSpec
 }
 \examples{
-path <- system.file("exampleData/01-Iris.pdf", package = "excelPlot")
-epFiles(path, commit = "HEAD", page = 1)
+path <- system.file("exampleData/01-Iris.pdf", package = "plotExcel")
+plotExcel:::epFiles(path, commit = "HEAD", page = 1)
 }
-\seealso{
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{getNPages}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotExcelFolder}()},
-\code{\link{plotSpec}()},
-\code{\link{textSpec}()}
-}
-\concept{UI}

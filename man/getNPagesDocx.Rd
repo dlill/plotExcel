@@ -14,6 +14,8 @@ Positive integer scalar
 }
 \description{
 Reads the \verb{<Pages>} value from \code{docProps/app.xml} in the zip container. That
-value is only present if the docx was saved by Word (or another authoring
-tool that populates it). Returns 1 otherwise.
+value is only present (and reliable) if the docx was saved by Word after a full
+rendering. When the metadata is missing or reports \code{1} (which is often stale for
+multi-page docs that were never opened in Word), we fall back to a headless
+Office->PDF conversion and count pages with \code{pdftools::pdf_length()}.
 }

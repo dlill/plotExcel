@@ -25,15 +25,14 @@ Writes a plotExcel file
 Compare plots of multiple folders with the same folder structure
 }
 \seealso{
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{epFiles}()},
-\code{\link{getNPages}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotExcelFolder}()},
-\code{\link{plotSpec}()},
-\code{\link{textSpec}()}
+Other UI:
+\code{\link[=availableStyles]{availableStyles()}},
+\code{\link[=parsePlotSpec]{parsePlotSpec()}},
+\code{\link[=parseTextSpec]{parseTextSpec()}},
+\code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotExcelDiff]{plotExcelDiff()}},
+\code{\link[=plotExcelFolder]{plotExcelFolder()}},
+\code{\link[=plotSpec]{plotSpec()}},
+\code{\link[=textSpec]{textSpec()}}
 }
 \concept{UI}

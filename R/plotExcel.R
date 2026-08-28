@@ -31,15 +31,15 @@
 #' d <- data.table(tibble::tribble(
 #'   ~Description, ~`Plots 1`, ~`Plots 2`, ~Comparison,
 #'   "Crop::3",
-#'   paste0(system.file("exampleData/01-Iris.pdf", package = "excelPlot"), "::xmax 85"),
-#'   paste0(system.file("exampleData/02-Iris-Brewer.pdf", package = "excelPlot")),
+#'   paste0(system.file("exampleData/01-Iris.pdf", package = "plotExcel"), "::xmax 85"),
+#'   paste0(system.file("exampleData/02-Iris-Brewer.pdf", package = "plotExcel")),
 #'   "diff(`Plots 1`, `Plots 2`)",
 #'   "Text rotated up::4",
-#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 2"),
-#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 1"),
+#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "plotExcel"), "::page 2"),
+#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "plotExcel"), "::page 1"),
 #'   "diff(`Plots 1`, `Plots 2`)"
 #' ))
-#' filename <- "~/.excelPlot/example.xlsx"
+#' filename <- "~/.plotExcel/example.xlsx"
 #' plotExcel(d, filename = filename, headerRowStyle = "center",
 #'   FLAGaddBorders = FALSE, FLAGpdf = FALSE, textColWidth = 5)
 #' # Export to pdf and open in viewer - commented out for CRAN check, run manually
@@ -58,7 +58,7 @@ plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = F
   if (mf & !FLAGtemp) stop("filename can't be missing when FLAGtemp == FALSE")
   pdfPageSize <- match.arg(pdfPageSize)
   if (FLAGtemp) {
-    filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
+    filename <- resolveTempFilename()
   }
 
   # ------------------------------------------------------------------------- #
@@ -109,10 +109,11 @@ plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = F
   filename <- resolveLockedFilePath(filename)
   t0 <- Sys.time()
   openxlsx::saveWorkbook(wb = wb, file = filename, overwrite = TRUE)
-  message("Excel sheet was saved at ", filename, " (", signif(Sys.time() - t0, 2), " s)")
-  message("List available text styles with `availableStyles()`.")
+  message("Excel file was saved to ", filename, " (", signif(Sys.time() - t0, 2), " s)")
+  message("Run `availableStyles()` to see text styles and decorator syntax.")
 
   if (FLAGpdf) {
+    message("Generating a pdf from the Excel file since FLAGpdf = TRUE.")
     pdfFilename <- file.path(tempdir(), paste0(tools::file_path_sans_ext(basename(filename)), ".pdf"))
     convertOfficeToPdf(fileIn = filename, fileOut = pdfFilename, pageSize = pdfPageSize)
     utils::browseURL(pdfFilename)
@@ -245,9 +246,14 @@ styleList <- list(
   )
 
 
-#' Print available styles
+#' Print available styles and decorator syntax
 #'
-#' @returns Prints available styles
+#' Lists the numbered text styles and the decorator syntax accepted by
+#' [parsePlotSpec()] and [parseTextSpec()], along with the image-diff expression
+#' syntax accepted in `plotExcel()` input tables. Plot decorator keys are
+#' derived from the arguments of [plotSpec()].
+#'
+#' @returns Prints available styles and decorator syntax.
 #' @export
 #' @md
 #' @family UI
@@ -255,7 +261,20 @@ styleList <- list(
 #' @examples
 #' availableStyles()
 availableStyles <- function() {
-  cat("Available styles:\n", paste0(seq_along(styleList), ": ", names(styleList) , collapse = "\n"), sep = "")
+  plotDecoratorKeys <- setdiff(names(formals(plotSpec)), "path")
+
+  cat(
+    "Available text styles:\n",
+    paste0(seq_along(styleList), ": ", names(styleList), collapse = "\n"),
+    "\n\nPlot decorator syntax:\n",
+    "path::key value::key2 value2\n",
+    "Valid keys: ", paste(plotDecoratorKeys, collapse = ", "),
+    "\n\nText decorator syntax:\n",
+    '"text::style"',
+    "\n\nDiff syntax:\n",
+    "diff(col1, col2)\n",
+    sep = ""
+  )
 }
 
 

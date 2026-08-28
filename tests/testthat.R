@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(excelPlot)
+library(plotExcel)
 
-test_check("excelPlot")
+test_check("plotExcel")

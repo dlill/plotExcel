@@ -1,3 +1,11 @@
+# plotExcel 1.0.0
+
+* Rename the package from `excelPlot` to `plotExcel`.
+* Rename `diffpdf()` to `plotExcelDiff()` and remove the pre-1.0 name.
+* Keep the public API focused by making low-level file and page helpers internal.
+* Use portable temporary output paths and consistent supported-file messaging.
+* Document plot, text, and diff decorator syntax in `availableStyles()`.
+
 # excelPlot 0.2.3
 
 * Add support for DOCX, PPTX, and Excel plot inputs in the preprocessing pipeline by converting to PDF first via a new `pngPipelineConvertOfficeToPdf` stage.

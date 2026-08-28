@@ -77,9 +77,10 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 }
 
 
-#' Export all plots in a folder into Excel or diff two pdfs/pngs
+#' Export all plots in a folder into Excel
 #'
-#' @param path Path with plots. Will be searched recursively for pdf, png, docx and pptx files
+#' @param path Path with plots. Will be searched recursively for pdf, png, docx,
+#'   and pptx files.
 #' @param filename File path of the output excel file
 #' @param fileSelection Vector of plots to be included. Default: NULL = include all files
 #' @param resolution in dpi
@@ -101,8 +102,7 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 #' @importFrom data.table rbindlist
 #' @examples
 #' \dontrun{
-#' plotExcelFolder(system.file("exampleData", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
-#' diffpdf(system.file("exampleData/01-Iris.pdf", package =  "excelPlot"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+#' plotExcelFolder(system.file("exampleData", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
 #' }
 plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 150, CFLAGLayout = c("no", "return", "insert"),
                             nPagesMax = 4, FLAGopenExcel = FALSE, FLAGtemp = FALSE, filterRegexpRemove = NULL,
@@ -110,24 +110,22 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
                             ) {
 
 
-  mf <- missing(filename)
-  sf <- substitute(filename)
-  if (!FLAGtemp & !mf) {
-    # If print is wanted
-    deparsedfilename <- deparse(sf)
-  } else {
-    filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
-    deparsedfilename <- deparse(filename)
-  }
+  folderPlotExtensions <- setdiff(SUPPORTED_PLOT_EXTENSIONS, "xlsx")
+  message("Supported file types: ", paste(folderPlotExtensions, collapse = ", "))
+  wrapperArguments <- resolveWrapperArguments(filename, substitute(filename), FLAGtemp, CFLAGLayout)
+  filename <- wrapperArguments$filename
+  deparsedfilename <- wrapperArguments$deparsedFilename
+  mf <- wrapperArguments$filenameMissing
+  CFLAGLayout <- wrapperArguments$CFLAGLayout
   verifyArg(fileSelection   , expectedMode = "character", allowNull = TRUE)
-  CFLAGLayout <- match.arg(CFLAGLayout)
   verifyArg(FLAGopenExcel   , expectedMode = "logical")
   verifyArg(FLAGtemp        , expectedMode = "logical")
   verifyArg(nPagesMax       , expectedMode = "numeric")
 
 
   # Get basic overview of plot files and pages
-  pdfFiles <- list.files(path, pattern = "\\.(pdf|png|docx|pptx)$", full.names = TRUE, recursive = TRUE, ignore.case = TRUE)
+  plotFilePattern <- paste0("\\.(", paste(folderPlotExtensions, collapse = "|"), ")$")
+  pdfFiles <- list.files(path, pattern = plotFilePattern, full.names = TRUE, recursive = TRUE, ignore.case = TRUE)
   if (!is.null(filterRegexpRemove)) pdfFiles <- grep(filterRegexpRemove, pdfFiles, value = TRUE, invert = TRUE)
   pdfFilesWithinProject <- gsub("^/?", "", gsub(paste0("^", path), "", pdfFiles))
 
@@ -142,7 +140,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
     "The order of fileSelection will be applied.\n\n",
     "fileSelection <- ", paste0(gsub("c\\(", "c(\n", deparse(unique(dPdfInfo$pdfFile), width.cutoff = 20)), collapse = "\n"),"\n",
     "\n",
-    "Alternatively, use FLAGinsertLayout to insert the full excel spec table into your Rscript")
+    "Alternatively, set `CFLAGLayout = \"insert\"` to insert the full Excel specification table into your R script.")
 
   if (!FLAGtemp & mf & CFLAGLayout == "no") {
     # This means we are only interested in fileSelection.
@@ -179,19 +177,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
     return(dPdfInfo)
   }
   if (CFLAGLayout == "insert") {
-    e <- rstudioapi::getSourceEditorContext()
-    rstudioapi::documentSave(id = e$id)
-    row <- e$selection[[1]]$range$end[1]
-
-    codeToInsert <- paste0(c(paste0("dLayout <- ", RSAddins::outputMdTable2(dPdfInfo)),
-                             "",
-                             paste0("excelPlot::plotExcel(d = dLayout, filename = ", deparsedfilename, ", textColWidth = 10)"),
-                             "\n"),
-                           collapse = "\n")
-
-    rstudioapi::insertText(location = rstudioapi::document_position(row, 1), text = codeToInsert, e$id)
-    rstudioapi::documentSave(id = e$id)
-    return(invisible(dPdfInfo))
+    return(insertLayoutCode(dPdfInfo, deparsedfilename))
   }
 
   # Export
@@ -202,25 +188,45 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
   invisible(filename)
 }
 
+#' Compare two plot files in Excel
+#'
+#' Creates an Excel workbook with the pages from two plot files side-by-side and
+#' a third column containing their image differences.
+#'
+#' @param file1,file2 Paths to the two plot files to compare.
+#' @param filename File path of the output Excel file.
+#' @param resolution Resolution in dpi used to render pages.
+#' @param FLAGopenExcel Open the Excel file after writing it?
+#' @param FLAGtemp Write to an automatically generated temporary output file?
 #' @param skip1,skip2 Optional integer vectors of output-row indices to leave blank for
 #'   File1 / File2. Skipped rows shift the remaining pages of that file down so that
 #'   pages meant to correspond can be aligned side-by-side. E.g. if file2 pages 1 and
 #'   2 correspond to file1 pages 1 and 5, pass `skip2 = c(2,3,4)`.
-#' @family UI
+#' @param CFLAGLayout What to do with the layout data.table: `"no"` writes the
+#'   workbook, `"return"` returns the table, and `"insert"` inserts the table as
+#'   code into the current script using the RSAddins package.
+#'
+#' @returns Invisibly returns the output filename, or the layout data.table when
+#'   `CFLAGLayout = "return"`.
 #' @export
-#' @rdname plotExcelFolder
-diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE,
-                    skip1 = NULL, skip2 = NULL, CFLAGLayout = c("no", "return", "insert")) {
-    mf <- missing(filename)
-    sf <- substitute(filename)
-    if (!FLAGtemp & !mf) {
-      # If print is wanted
-      deparsedfilename <- deparse(sf)
-    } else {
-      filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
-      deparsedfilename <- deparse(filename)
-    }
-    CFLAGLayout <- match.arg(CFLAGLayout)
+#' @md
+#' @family UI
+#' @examples
+#' \dontrun{
+#' plotExcelDiff(
+#'   system.file("exampleData/01-Iris.pdf", package = "plotExcel"),
+#'   system.file("exampleData/02-Iris-Brewer.pdf", package = "plotExcel"),
+#'   FLAGtemp = TRUE,
+#'   FLAGopenExcel = TRUE
+#' )
+#' }
+plotExcelDiff <- function(file1, file2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE,
+                          skip1 = NULL, skip2 = NULL, CFLAGLayout = c("no", "return", "insert")) {
+  message("Supported file types: ", paste(SUPPORTED_PLOT_EXTENSIONS, collapse = ", "))
+    wrapperArguments <- resolveWrapperArguments(filename, substitute(filename), FLAGtemp, CFLAGLayout)
+    filename <- wrapperArguments$filename
+    deparsedfilename <- wrapperArguments$deparsedFilename
+    CFLAGLayout <- wrapperArguments$CFLAGLayout
     verifyArg(FLAGopenExcel   , expectedMode = "logical")
     verifyArg(FLAGtemp        , expectedMode = "logical")
     verifyArg(skip1           , expectedMode = "numeric", allowNull = TRUE)
@@ -228,24 +234,30 @@ diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExce
     skip1 <- as.integer(skip1)
     skip2 <- as.integer(skip2)
 
-    # Get basic overview of pdf files and pages
-    nPages1 <- getNPages(pdfFile1)
-    nPages2 <- getNPages(pdfFile2)
+    # Get basic overview of plot files and pages
+    nPages1 <- getNPages(file1)
+    nPages2 <- getNPages(file2)
+    if (nPages1 != nPages2 && !length(skip1) && !length(skip2)) {
+      message(
+        "The files have different page counts (", nPages1, " and ", nPages2, "). ",
+        "Use `skip1` or `skip2` to align corresponding pages."
+      )
+    }
 
     # Build one column of plotSpecs, leaving `skip` output rows blank and shifting
     # the remaining pages down. Returns a character vector whose length equals the
     # last used output row.
-    buildFileCol <- function(pdfFile, nPages, skip, resolution) {
+    buildFileCol <- function(plotFile, nPages, skip, resolution) {
       if (nPages == 0) return(character(0))
       candidate  <- seq_len(nPages + length(skip))
       nonSkip    <- setdiff(candidate, skip)
       targetRows <- nonSkip[seq_len(nPages)]
       out <- rep(NA_character_, max(targetRows))
-      out[targetRows] <- paste0(pdfFile, "::page ", seq_len(nPages), "::resolution ", resolution)
+      out[targetRows] <- paste0(plotFile, "::page ", seq_len(nPages), "::resolution ", resolution)
       out
     }
-    col1 <- buildFileCol(pdfFile1, nPages1, skip1, resolution)
-    col2 <- buildFileCol(pdfFile2, nPages2, skip2, resolution)
+    col1 <- buildFileCol(file1, nPages1, skip1, resolution)
+    col2 <- buildFileCol(file2, nPages2, skip2, resolution)
 
     # Pad the shorter column with NA so both align to the same row count
     nPagesTotal <- max(length(col1), length(col2))
@@ -261,26 +273,14 @@ diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExce
     dPdfInfo[is.na(File1) | is.na(File2),`:=`(Diff = "Page lengths differ - no diff available::center")]
 
     # Subheader row: empty Page, file paths in File1/File2, empty Diff
-    dSubheader <- data.table(Page = "", File1 = paste0("* ", pdfFile1), File2 = paste0("* ", pdfFile2), Diff = "")
+    dSubheader <- data.table(Page = "", File1 = paste0("* ", file1), File2 = paste0("* ", file2), Diff = "")
     dPdfInfo <- data.table::rbindlist(list(dSubheader, dPdfInfo), use.names = TRUE)
 
     if (CFLAGLayout == "return") {
       return(dPdfInfo)
     }
     if (CFLAGLayout == "insert") {
-      e <- rstudioapi::getSourceEditorContext()
-      rstudioapi::documentSave(id = e$id)
-      row <- e$selection[[1]]$range$end[1]
-
-      codeToInsert <- paste0(c(paste0("dLayout <- ", RSAddins::outputMdTable2(dPdfInfo)),
-                               "",
-                               paste0("excelPlot::plotExcel(d = dLayout, filename = ", deparsedfilename, ", textColWidth = 10)"),
-                               "\n"),
-                             collapse = "\n")
-
-      rstudioapi::insertText(location = rstudioapi::document_position(row, 1), text = codeToInsert, e$id)
-      rstudioapi::documentSave(id = e$id)
-      return(invisible(dPdfInfo))
+      return(insertLayoutCode(dPdfInfo, deparsedfilename))
     }
 
 

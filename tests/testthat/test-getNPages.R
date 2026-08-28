@@ -1,5 +1,5 @@
 test_that("getNPages returns expected counts across supported file types", {
-  ex <- system.file("exampleData", package = "excelPlot")
+  ex <- system.file("exampleData", package = "plotExcel")
   skip_if(!nzchar(ex), "example data not installed")
 
   expect_equal(getNPages(file.path(ex, "01-Iris.pdf")), 1)

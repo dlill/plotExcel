@@ -21,15 +21,14 @@ text <- "Iris Blue::rotateUp"
 parseTextSpec(text)
 }
 \seealso{
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{epFiles}()},
-\code{\link{getNPages}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotExcelFolder}()},
-\code{\link{plotSpec}()},
-\code{\link{textSpec}()}
+Other UI:
+\code{\link[=availableStyles]{availableStyles()}},
+\code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
+\code{\link[=parsePlotSpec]{parsePlotSpec()}},
+\code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotExcelDiff]{plotExcelDiff()}},
+\code{\link[=plotExcelFolder]{plotExcelFolder()}},
+\code{\link[=plotSpec]{plotSpec()}},
+\code{\link[=textSpec]{textSpec()}}
 }
 \concept{UI}

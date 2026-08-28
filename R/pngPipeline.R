@@ -60,7 +60,7 @@ pngPipelineCheckoutToTemp <- function(plotSpec) {
   # Case 3: Fetch from commit
   fetchSuccessful <- shell(paste0("cd ", shQuote(dirname(fileIn)), " && git show ", plotSpec$commit, ":./", shQuote(basename(fileIn)), " > ", shQuote(fileOut)), intern = TRUE)
   if (length(fetchSuccessful) > 0 && attr(fetchSuccessful, "status") != 0) {
-    file.copy(system.file("fileDoesNotExist.pdf", package = "excelPlot"), fileOut, overwrite = TRUE)
+    file.copy(system.file("fileDoesNotExist.pdf", package = "plotExcel"), fileOut, overwrite = TRUE)
   }
 
   fileOut
@@ -130,7 +130,7 @@ pngPipelineConvertOfficeToPdf <- function(plotSpec) {
 #'
 #' @examples
 #' \dontrun{
-#' fileIn <- system.file("exampleData/plots.xlsx", package = "excelPlot")
+#' fileIn <- system.file("exampleData/plots.xlsx", package = "plotExcel")
 #' fileOut <- tempfile(fileext = ".pdf")
 #' convertOfficeToPdf(fileIn, fileOut, pageSize = "single")
 #' unlink(fileOut)
@@ -503,7 +503,7 @@ idempotencyNoActionRequired <- function(fileIn, fileOut, commit, fileIn2 = NULL)
 #' @importFrom stats setNames
 #'
 #' @examples
-#' path <- system.file("exampleData/01-Iris.pdf", package = "excelPlot")
+#' path <- system.file("exampleData/01-Iris.pdf", package = "plotExcel")
 #' plotSpec <- plotSpec(path, commit = "asdf234", page = 1, xmax = 85)
 plotSpec <- function(path, commit = "HEAD", page = 1, xmin = 0, xmax = 100, ymin = 0, ymax = 100, resolution = 100) {
 
@@ -540,7 +540,7 @@ plotSpec <- function(path, commit = "HEAD", page = 1, xmin = 0, xmax = 100, ymin
 #' @importFrom stats setNames
 #'
 #' @examples
-#' path <- system.file("exampleData/01-Iris.pdf", package = "excelPlot")
+#' path <- system.file("exampleData/01-Iris.pdf", package = "plotExcel")
 #' text <- paste0(path, "::commit HEAD::page 20::xmax 50::ymin 20")
 #' parsePlotSpec(text)
 parsePlotSpec <- function(text) {

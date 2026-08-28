@@ -1,5 +1,78 @@
 
 
+SUPPORTED_PLOT_EXTENSIONS <- c("pdf", "png", "docx", "pptx", "xlsx")
+
+
+#' Resolve a temporary output filename
+#'
+#' @param ext File extension without a leading dot.
+#'
+#' @return A timestamped filename in the preferred project directory when it
+#'   exists, otherwise in the user's home directory.
+#' @md
+resolveTempFilename <- function(ext = "xlsx") {
+  baseDir <- if (.Platform$OS.type == "windows") "C:/PROJECTS" else path.expand("~/PROJECTS")
+  if (!dir.exists(baseDir)) baseDir <- path.expand("~/")
+
+  file.path(baseDir, paste0("tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"), ".", ext))
+}
+
+
+#' Resolve shared wrapper arguments
+#'
+#' @param filename Output filename, which may be missing.
+#' @param filenameExpression Unevaluated filename expression for inserted code.
+#' @param FLAGtemp Whether to use an automatically generated output filename.
+#' @param CFLAGLayout Requested layout handling mode.
+#'
+#' @return A list containing the resolved filename, its code representation,
+#'   whether it was missing, and the matched layout mode.
+#' @md
+resolveWrapperArguments <- function(filename, filenameExpression, FLAGtemp, CFLAGLayout) {
+  filenameMissing <- missing(filename)
+  if (FLAGtemp || filenameMissing) {
+    filename <- resolveTempFilename()
+    filenameExpression <- filename
+  }
+
+  list(
+    filename = filename,
+    deparsedFilename = deparse(filenameExpression),
+    filenameMissing = filenameMissing,
+    CFLAGLayout = match.arg(CFLAGLayout, c("no", "return", "insert"))
+  )
+}
+
+
+#' Insert an Excel layout into the active RStudio script
+#'
+#' @param dLayout Layout data.table to insert.
+#' @param deparsedFilename Code representation of the output filename.
+#'
+#' @return `dLayout`, invisibly.
+#' @md
+insertLayoutCode <- function(dLayout, deparsedFilename) {
+  editorContext <- rstudioapi::getSourceEditorContext()
+  rstudioapi::documentSave(id = editorContext$id)
+  row <- editorContext$selection[[1]]$range$end[1]
+
+  codeToInsert <- paste0(c(
+    paste0("dLayout <- ", RSAddins::outputMdTable2(dLayout)),
+    "",
+    paste0("plotExcel::plotExcel(d = dLayout, filename = ", deparsedFilename, ", textColWidth = 10)"),
+    "\n"
+  ), collapse = "\n")
+
+  rstudioapi::insertText(
+    location = rstudioapi::document_position(row, 1),
+    text = codeToInsert,
+    id = editorContext$id
+  )
+  rstudioapi::documentSave(id = editorContext$id)
+  invisible(dLayout)
+}
+
+
 #' Verify that input arguments meet certain conditions
 #'
 #' @param x Any object
@@ -116,7 +189,6 @@ verifyArg <- function(x, allowNull = FALSE,
 #' @param path File path to check
 #'
 #' @returns Original `path` if writable; otherwise, a datetime-stamped path
-#' @export
 #' @md
 #' @importFrom tools file_path_sans_ext file_ext
 resolveLockedFilePath <- function(path) {
@@ -170,9 +242,7 @@ resolveLockedFilePath <- function(path) {
 #' @param path Path to a plot input file
 #'
 #' @return Positive integer scalar
-#' @export
 #' @md
-#' @family UI
 #' @importFrom tools file_ext
 #' @importFrom pdftools pdf_length
 getNPages <- function(path) {
@@ -252,7 +322,6 @@ getNPagesDocx <- function(path) {
 #' This function is more for documentation purposes, until I find a better way to install it.
 #'
 #' @returns Prints the macro
-#' @export
 #' @md
 onePageMacro <- function() {
 

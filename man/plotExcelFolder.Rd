@@ -2,8 +2,7 @@
 % Please edit documentation in R/userInterface.R
 \name{plotExcelFolder}
 \alias{plotExcelFolder}
-\alias{diffpdf}
-\title{Export all plots in a folder into Excel or diff two pdfs/pngs}
+\title{Export all plots in a folder into Excel}
 \usage{
 plotExcelFolder(
   path,
@@ -17,19 +16,10 @@ plotExcelFolder(
   filterRegexpRemove = NULL,
   compareToCommit = NULL
 )
-
-diffpdf(
-  pdfFile1,
-  pdfFile2,
-  filename,
-  resolution = 100,
-  FLAGopenExcel = TRUE,
-  FLAGtemp = TRUE,
-  CFLAGLayout = c("no", "return", "insert")
-)
 }
 \arguments{
-\item{path}{Path with plots. Will be searched recursively for pdf, png, docx and pptx files}
+\item{path}{Path with plots. Will be searched recursively for pdf, png, docx,
+and pptx files.}
 
 \item{filename}{File path of the output excel file}
 
@@ -56,35 +46,22 @@ diffpdf(
 Writes the Excel file to filename.
 }
 \description{
-Export all plots in a folder into Excel or diff two pdfs/pngs
+Export all plots in a folder into Excel
 }
 \examples{
 \dontrun{
-plotExcelFolder(system.file("exampleData", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
-diffpdf(system.file("exampleData/01-Iris.pdf", package =  "excelPlot"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+plotExcelFolder(system.file("exampleData", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
 }
 }
 \seealso{
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{epFiles}()},
-\code{\link{getNPages}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotSpec}()},
-\code{\link{textSpec}()}
-
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{epFiles}()},
-\code{\link{getNPages}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotSpec}()},
-\code{\link{textSpec}()}
+Other UI:
+\code{\link[=availableStyles]{availableStyles()}},
+\code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
+\code{\link[=parsePlotSpec]{parsePlotSpec()}},
+\code{\link[=parseTextSpec]{parseTextSpec()}},
+\code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotExcelDiff]{plotExcelDiff()}},
+\code{\link[=plotSpec]{plotSpec()}},
+\code{\link[=textSpec]{textSpec()}}
 }
 \concept{UI}
