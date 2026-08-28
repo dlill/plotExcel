@@ -1,6 +1,6 @@
 
 
-SUPPORTED_PLOT_EXTENSIONS <- c("pdf", "png", "docx", "pptx", "xlsx")
+SUPPORTED_PLOT_EXTENSIONS <- c("pdf", "png", "docx", "pptx", "xlsx", "html", "htm")
 
 
 #' Resolve a temporary output filename
@@ -226,10 +226,10 @@ resolveLockedFilePath <- function(path) {
 }
 
 
-#' Number of pages / slides of a plot input file, without conversion
+#' Number of pages / slides of a plot input file
 #'
 #' Cheap dispatcher used before the plot pipeline runs so that Office files
-#' don't have to be converted to PDF just to get a page count.
+#' don't generally have to be converted to PDF just to get a page count.
 #'
 #' * `.pdf`  -> [pdftools::pdf_length()]
 #' * `.png`  -> 1
@@ -237,6 +237,7 @@ resolveLockedFilePath <- function(path) {
 #' * `.docx` -> `<Pages>` field parsed from `docProps/app.xml` in the zip
 #'   container (as saved by Word). Falls back to 1 when no such metadata is
 #'   present (e.g. docx files produced by tools other than Word).
+#' * `.html` / `.htm` -> converted to PDF before counting pages
 #' * anything else (`.doc`, `.ppt`, ...) -> 1
 #'
 #' @param path Path to a plot input file
@@ -252,7 +253,22 @@ getNPages <- function(path) {
   if (ext == "png")  return(1L)
   if (ext == "pptx") return(getNSlidesPptx(path))
   if (ext == "docx") return(getNPagesDocx(path))
+  if (ext %in% c("html", "htm")) return(getNPagesHTML(path))
   1L
+}
+
+
+#' Number of pages in an HTML file after rendering
+#'
+#' @param path Path to an `.html` or `.htm` file
+#'
+#' @return Positive integer scalar
+#' @md
+getNPagesHTML <- function(path) {
+  tmpPdf <- tempfile(fileext = ".pdf")
+  on.exit(unlink(tmpPdf), add = TRUE)
+  convertHTMLToPdf(fileIn = path, fileOut = tmpPdf)
+  pdftools::pdf_length(tmpPdf)
 }
 
 

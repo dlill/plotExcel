@@ -18,7 +18,7 @@ Currently, the pipeline has the following steps
 \details{
 \itemize{
 \item Check out from git
-\item Convert Office documents (docx/pptx) to pdf (or copy pdf/png through)
+\item Convert external documents (Office/HTML) to pdf (or copy pdf/png through)
 \item Extract page from pdf as png
 \item Crop png to specified part
 }

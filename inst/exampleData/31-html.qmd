@@ -1,0 +1,52 @@
+---
+title: "plotExcel"
+format: 
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-depth: 4
+    toc-title: "Contents"
+    number-sections: true
+    code-fold: true
+    code-tools: true
+    smooth-scroll: true
+    fig-width: 10
+    fig-height: 6
+    embed-resources: true
+    highlight-style: github
+    grid:
+      sidebar-width: 280px
+      body-width: 900px
+
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r}
+library(ggplot2)
+
+ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species)) +
+geom_point() +
+  scale_color_brewer() + 
+theme_minimal()
+```

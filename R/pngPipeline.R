@@ -8,7 +8,7 @@
 #' Currently, the pipeline has the following steps
 #'
 #' * Check out from git
-#' * Convert Office documents (docx/pptx) to pdf (or copy pdf/png through)
+#' * Convert external documents (Office/HTML) to pdf (or copy pdf/png through)
 #' * Extract page from pdf as png
 #' * Crop png to specified part
 #'
@@ -22,7 +22,7 @@ applyPngPipelineOnePage <- function(plotSpec) {
   cat("File ", plotSpec$path, " page ", plotSpec$page, ": ")
   pngPipelineCheckoutToTemp(plotSpec)
   cat(".")
-  pngPipelineConvertOfficeToPdf(plotSpec)
+  pngPipelineConvertExternalFormats(plotSpec)
   cat(".")
   pngPipelineExtractPage(plotSpec)
   cat(".")
@@ -68,26 +68,22 @@ pngPipelineCheckoutToTemp <- function(plotSpec) {
 }
 
 
-#' Convert Office documents to PDF, or copy through pdf/png files
+#' Convert external document formats to PDF, or copy through pdf/png files
 #'
 #' Second stage of the plot preprocessing pipeline. Runs on the file produced by
 #' [pngPipelineCheckoutToTemp()] and writes to `tmpPathCommitPdf` (see [epFiles()]).
 #'
-#' * If the input file is `.docx`, `.doc`, `.pptx`, `.ppt`, `.xlsx`, `.xlsm`
-#'   or `.xls`, it is converted to PDF.
+#' * Office inputs are converted with [convertOfficeToPdf()].
+#' * HTML inputs are converted with [convertHTMLToPdf()].
 #' * Otherwise (`.pdf` / `.png`) the file is simply copied so downstream stages can
 #'   rely on `tmpPathCommitPdf` unconditionally.
-#'
-#' Conversion is dispatched by OS:
-#' * Windows: [convertOfficeToPdfWindows()] (PowerShell + Office COM automation)
-#' * Linux/macOS: [convertOfficeToPdfLinux()] (`libreoffice --headless --convert-to pdf`)
 #'
 #' @param plotSpec A [plotSpec()]
 #'
 #' @return file.path to pdf/png file suitable for [pngPipelineExtractPage()]
 #' @md
 #' @importFrom tools file_ext
-pngPipelineConvertOfficeToPdf <- function(plotSpec) {
+pngPipelineConvertExternalFormats <- function(plotSpec) {
   files <- do.call(epFiles, plotSpec)
   fileIn = files$tmpPathCommit
   fileOut = files$tmpPathCommitPdf
@@ -99,16 +95,60 @@ pngPipelineConvertOfficeToPdf <- function(plotSpec) {
 
   dir.create(dirname(fileOut), showWarnings = FALSE, recursive = TRUE)
 
-  # Case 2: Non-office file - just copy through
-  if (!tolower(tools::file_ext(fileIn)) %in% c("docx", "doc", "pptx", "ppt", "xlsx", "xlsm", "xls")) {
-    file.copy(from = fileIn, to = fileOut, overwrite = TRUE)
+  ext <- tolower(tools::file_ext(fileIn))
+  officeExt <- c("docx", "doc", "pptx", "ppt", "xlsx", "xlsm", "xls")
+
+  # Case 2: Office file
+  if (ext %in% officeExt) {
+    convertOfficeToPdf(fileIn = fileIn, fileOut = fileOut)
     return(fileOut)
   }
 
-  # Case 3: Office file - convert via OS-specific subfunction
-  convertOfficeToPdf(fileIn = fileIn, fileOut = fileOut)
+  # Case 3: HTML file
+  if (ext %in% c("html", "htm")) {
+    convertHTMLToPdf(fileIn = fileIn, fileOut = fileOut)
+    return(fileOut)
+  }
+
+  # Case 4: PDF/PNG file - just copy through
+  if (!ext %in% c("pdf", "png")) {
+    stop("Unsupported plot file extension: .", ext)
+  }
+  if (!file.copy(from = fileIn, to = fileOut, overwrite = TRUE)) {
+    stop("Failed to copy plot file to pipeline intermediate: ", fileOut)
+  }
 
   fileOut
+}
+
+
+#' Convert an HTML document to PDF
+#'
+#' Uses a headless Chrome browser through [pagedown::chrome_print()].
+#'
+#' @param fileIn Path to the input HTML file.
+#' @param fileOut Target path for the PDF output.
+#'
+#' @return `fileOut`, invisibly.
+#' @md
+#' @importFrom tools file_ext
+convertHTMLToPdf <- function(fileIn, fileOut) {
+  if (!file.exists(fileIn)) {
+    stop("Input file does not exist: ", fileIn)
+  }
+  ext <- tolower(tools::file_ext(fileIn))
+  if (!ext %in% c("html", "htm")) {
+    stop("Unsupported HTML file extension: .", ext)
+  }
+
+  dir.create(dirname(fileOut), showWarnings = FALSE, recursive = TRUE)
+  if (file.exists(fileOut)) unlink(fileOut)
+  pagedown::chrome_print(input = fileIn, output = fileOut)
+
+  if (!file.exists(fileOut)) {
+    stop("HTML conversion did not produce expected file: ", fileOut)
+  }
+  invisible(fileOut)
 }
 
 

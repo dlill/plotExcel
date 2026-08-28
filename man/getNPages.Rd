@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{getNPages}
 \alias{getNPages}
-\title{Number of pages / slides of a plot input file, without conversion}
+\title{Number of pages / slides of a plot input file}
 \usage{
 getNPages(path)
 }
@@ -14,7 +14,7 @@ Positive integer scalar
 }
 \description{
 Cheap dispatcher used before the plot pipeline runs so that Office files
-don't have to be converted to PDF just to get a page count.
+don't generally have to be converted to PDF just to get a page count.
 }
 \details{
 \itemize{
@@ -24,6 +24,7 @@ don't have to be converted to PDF just to get a page count.
 \item \code{.docx} -> \verb{<Pages>} field parsed from \code{docProps/app.xml} in the zip
 container (as saved by Word). Falls back to 1 when no such metadata is
 present (e.g. docx files produced by tools other than Word).
+\item \code{.html} / \code{.htm} -> converted to PDF before counting pages
 \item anything else (\code{.doc}, \code{.ppt}, ...) -> 1
 }
 }
