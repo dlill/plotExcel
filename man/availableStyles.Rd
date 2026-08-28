@@ -18,8 +18,6 @@ availableStyles()
 \seealso{
 Other UI:
 \code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
-\code{\link[=epFiles]{epFiles()}},
-\code{\link[=getNPages]{getNPages()}},
 \code{\link[=parsePlotSpec]{parsePlotSpec()}},
 \code{\link[=parseTextSpec]{parseTextSpec()}},
 \code{\link[=plotExcel]{plotExcel()}},

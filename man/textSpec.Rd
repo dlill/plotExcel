@@ -24,8 +24,6 @@ textSpec(text = "Text 1", style = "rotateUp")
 Other UI:
 \code{\link[=availableStyles]{availableStyles()}},
 \code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
-\code{\link[=epFiles]{epFiles()}},
-\code{\link[=getNPages]{getNPages()}},
 \code{\link[=parsePlotSpec]{parsePlotSpec()}},
 \code{\link[=parseTextSpec]{parseTextSpec()}},
 \code{\link[=plotExcel]{plotExcel()}},

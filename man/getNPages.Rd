@@ -27,17 +27,3 @@ present (e.g. docx files produced by tools other than Word).
 \item anything else (\code{.doc}, \code{.ppt}, ...) -> 1
 }
 }
-\seealso{
-Other UI:
-\code{\link[=availableStyles]{availableStyles()}},
-\code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
-\code{\link[=epFiles]{epFiles()}},
-\code{\link[=parsePlotSpec]{parsePlotSpec()}},
-\code{\link[=parseTextSpec]{parseTextSpec()}},
-\code{\link[=plotExcel]{plotExcel()}},
-\code{\link[=plotExcelDiff]{plotExcelDiff()}},
-\code{\link[=plotExcelFolder]{plotExcelFolder()}},
-\code{\link[=plotSpec]{plotSpec()}},
-\code{\link[=textSpec]{textSpec()}}
-}
-\concept{UI}

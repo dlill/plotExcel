@@ -116,7 +116,6 @@ verifyArg <- function(x, allowNull = FALSE,
 #' @param path File path to check
 #'
 #' @returns Original `path` if writable; otherwise, a datetime-stamped path
-#' @export
 #' @md
 #' @importFrom tools file_path_sans_ext file_ext
 resolveLockedFilePath <- function(path) {
@@ -170,9 +169,7 @@ resolveLockedFilePath <- function(path) {
 #' @param path Path to a plot input file
 #'
 #' @return Positive integer scalar
-#' @export
 #' @md
-#' @family UI
 #' @importFrom tools file_ext
 #' @importFrom pdftools pdf_length
 getNPages <- function(path) {
@@ -252,7 +249,6 @@ getNPagesDocx <- function(path) {
 #' This function is more for documentation purposes, until I find a better way to install it.
 #'
 #' @returns Prints the macro
-#' @export
 #' @md
 onePageMacro <- function() {
 

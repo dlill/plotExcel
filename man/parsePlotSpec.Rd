@@ -24,8 +24,6 @@ parsePlotSpec(text)
 Other UI:
 \code{\link[=availableStyles]{availableStyles()}},
 \code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
-\code{\link[=epFiles]{epFiles()}},
-\code{\link[=getNPages]{getNPages()}},
 \code{\link[=parseTextSpec]{parseTextSpec()}},
 \code{\link[=plotExcel]{plotExcel()}},
 \code{\link[=plotExcelDiff]{plotExcelDiff()}},

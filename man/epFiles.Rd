@@ -39,17 +39,3 @@ Construct all temp plot file names from a plotSpec
 path <- system.file("exampleData/01-Iris.pdf", package = "plotExcel")
 epFiles(path, commit = "HEAD", page = 1)
 }
-\seealso{
-Other UI:
-\code{\link[=availableStyles]{availableStyles()}},
-\code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
-\code{\link[=getNPages]{getNPages()}},
-\code{\link[=parsePlotSpec]{parsePlotSpec()}},
-\code{\link[=parseTextSpec]{parseTextSpec()}},
-\code{\link[=plotExcel]{plotExcel()}},
-\code{\link[=plotExcelDiff]{plotExcelDiff()}},
-\code{\link[=plotExcelFolder]{plotExcelFolder()}},
-\code{\link[=plotSpec]{plotSpec()}},
-\code{\link[=textSpec]{textSpec()}}
-}
-\concept{UI}

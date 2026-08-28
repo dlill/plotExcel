@@ -5,9 +5,7 @@
 #' @param ... Sink for unused
 #'
 #' @return List of paths to the respective files
-#' @export
 #' @md
-#' @family UI
 #' @importFrom tools file_path_sans_ext file_ext
 #'
 #' @examples
