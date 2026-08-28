@@ -2,22 +2,26 @@
 % Please edit documentation in R/userInterface.R
 \name{plotExcelDiff}
 \alias{plotExcelDiff}
-\title{Compare two plot files in Excel}
+\title{Compare plot files or revisions in Excel}
 \usage{
 plotExcelDiff(
   file1,
-  file2,
+  file2 = NULL,
   filename,
   resolution = 100,
   FLAGopenExcel = TRUE,
   FLAGtemp = TRUE,
   skip1 = NULL,
   skip2 = NULL,
-  CFLAGLayout = c("no", "return", "insert")
+  CFLAGLayout = c("no", "return", "insert"),
+  commit = NULL
 )
 }
 \arguments{
-\item{file1, file2}{Paths to the two plot files to compare.}
+\item{file1}{Path to the current plot file.}
+
+\item{file2}{Optional path to a second plot file. When omitted, \code{commit} must
+identify a revision of \code{file1} to compare against.}
 
 \item{filename}{File path of the output Excel file.}
 
@@ -35,20 +39,29 @@ pages meant to correspond can be aligned side-by-side. E.g. if file2 pages 1 and
 \item{CFLAGLayout}{What to do with the layout data.table: \code{"no"} writes the
 workbook, \code{"return"} returns the table, and \code{"insert"} inserts the table as
 code into the current script using the RSAddins package.}
+
+\item{commit}{Optional commit identifying the revision of \code{file1} to use as
+File2. May only be supplied when \code{file2} is omitted.}
 }
 \value{
 Invisibly returns the output filename, or the layout data.table when
 \code{CFLAGLayout = "return"}.
 }
 \description{
-Creates an Excel workbook with the pages from two plot files side-by-side and
-a third column containing their image differences.
+Creates an Excel workbook with pages from two plot files, or from the current
+file and a committed revision, side-by-side with their image differences.
 }
 \examples{
 \dontrun{
 plotExcelDiff(
   system.file("exampleData/01-Iris.pdf", package = "plotExcel"),
   system.file("exampleData/02-Iris-Brewer.pdf", package = "plotExcel"),
+  FLAGtemp = TRUE,
+  FLAGopenExcel = TRUE
+)
+plotExcelDiff(
+  "path/to/versioned-plot.pdf",
+  commit = "HEAD~1",
   FLAGtemp = TRUE,
   FLAGopenExcel = TRUE
 )

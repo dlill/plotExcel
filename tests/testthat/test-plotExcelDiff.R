@@ -32,6 +32,50 @@ test_that("plotExcelDiff works for two DOCX files", {
   runPlotExcelDiffCase("21-Word.docx", "22-Word.docx", "docx")
 })
 
+test_that("plotExcelDiff compares one file against a commit", {
+  testDir <- tempfile("plotExcelDiff-git-")
+  dir.create(testDir, recursive = TRUE)
+  on.exit(unlink(testDir, recursive = TRUE), add = TRUE)
+
+  plotFile <- file.path(testDir, "plot.png")
+  magick::image_write(magick::image_blank(100, 100, color = "white"), plotFile)
+  git2r::init(testDir)
+  git2r::add(testDir, "plot.png")
+  git2r::commit(testDir, message = "Initial plot", all = TRUE)
+  commit <- git2r::reflog(testDir)[[1]][[1]]
+  magick::image_write(magick::image_blank(100, 100, color = "black"), plotFile)
+
+  layout <- plotExcelDiff(
+    plotFile,
+    commit = commit,
+    FLAGopenExcel = FALSE,
+    CFLAGLayout = "return"
+  )
+
+  expect_equal(layout$File1[[2]], paste0(plotFile, "::page 1::resolution 100"))
+  expect_equal(layout$File2[[2]], paste0(plotFile, "::commit ", commit, "::page 1::resolution 100"))
+  expect_equal(layout$File2[[1]], paste0("* ", plotFile, " (commit ", commit, ")"))
+
+  out <- tempfile(fileext = ".xlsx")
+  result <- suppressNAcoercion(
+    plotExcelDiff(plotFile, commit = commit, filename = out, FLAGtemp = FALSE, FLAGopenExcel = FALSE)
+  )
+  expect_true(file.exists(out))
+  expect_gt(file.info(out)$size, 0)
+  expect_equal(normalizePath(result), normalizePath(out))
+})
+
+test_that("plotExcelDiff requires exactly one of file2 and commit", {
+  expect_error(
+    plotExcelDiff("plot.png", FLAGopenExcel = FALSE, CFLAGLayout = "return"),
+    "`commit` must be supplied"
+  )
+  expect_error(
+    plotExcelDiff("plot.png", "other.png", commit = "HEAD", FLAGopenExcel = FALSE, CFLAGLayout = "return"),
+    "`commit` may only be supplied"
+  )
+})
+
 test_that("plotExcelDiff aligns pages via skip1 when the second file has extra slides", {
   ex <- system.file("exampleData", package = "plotExcel")
   skip_if(!nzchar(ex), "example data not installed")

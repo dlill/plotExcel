@@ -188,12 +188,16 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
   invisible(filename)
 }
 
-#' Compare two plot files in Excel
+#' Compare plot files or revisions in Excel
 #'
-#' Creates an Excel workbook with the pages from two plot files side-by-side and
-#' a third column containing their image differences.
+#' Creates an Excel workbook with pages from two plot files, or from the current
+#' file and a committed revision, side-by-side with their image differences.
 #'
-#' @param file1,file2 Paths to the two plot files to compare.
+#' @param file1 Path to the current plot file.
+#' @param file2 Optional path to a second plot file. When omitted, `commit` must
+#'   identify a revision of `file1` to compare against.
+#' @param commit Optional commit identifying the revision of `file1` to use as
+#'   File2. May only be supplied when `file2` is omitted.
 #' @param filename File path of the output Excel file.
 #' @param resolution Resolution in dpi used to render pages.
 #' @param FLAGopenExcel Open the Excel file after writing it?
@@ -219,14 +223,23 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
 #'   FLAGtemp = TRUE,
 #'   FLAGopenExcel = TRUE
 #' )
+#' plotExcelDiff(
+#'   "path/to/versioned-plot.pdf",
+#'   commit = "HEAD~1",
+#'   FLAGtemp = TRUE,
+#'   FLAGopenExcel = TRUE
+#' )
 #' }
-plotExcelDiff <- function(file1, file2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE,
-                          skip1 = NULL, skip2 = NULL, CFLAGLayout = c("no", "return", "insert")) {
+plotExcelDiff <- function(file1, file2 = NULL, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE,
+                          skip1 = NULL, skip2 = NULL, CFLAGLayout = c("no", "return", "insert"), commit = NULL) {
   message("Supported file types: ", paste(SUPPORTED_PLOT_EXTENSIONS, collapse = ", "))
     wrapperArguments <- resolveWrapperArguments(filename, substitute(filename), FLAGtemp, CFLAGLayout)
     filename <- wrapperArguments$filename
     deparsedfilename <- wrapperArguments$deparsedFilename
     CFLAGLayout <- wrapperArguments$CFLAGLayout
+    verifyArg(file1           , expectedClass = "character", expectedLength = 1)
+    verifyArg(file2           , expectedClass = "character", expectedLength = 1, allowNull = TRUE)
+    verifyArg(commit          , expectedClass = "character", expectedLength = 1, allowNull = TRUE)
     verifyArg(FLAGopenExcel   , expectedMode = "logical")
     verifyArg(FLAGtemp        , expectedMode = "logical")
     verifyArg(skip1           , expectedMode = "numeric", allowNull = TRUE)
@@ -234,9 +247,25 @@ plotExcelDiff <- function(file1, file2, filename, resolution = 100, FLAGopenExce
     skip1 <- as.integer(skip1)
     skip2 <- as.integer(skip2)
 
+    compareToCommit <- is.null(file2)
+    if (compareToCommit && is.null(commit)) {
+      stop("`commit` must be supplied when `file2` is omitted.")
+    }
+    if (!compareToCommit && !is.null(commit)) {
+      stop("`commit` may only be supplied when `file2` is omitted.")
+    }
+
     # Get basic overview of plot files and pages
     nPages1 <- getNPages(file1)
-    nPages2 <- getNPages(file2)
+    if (compareToCommit) {
+      file2 <- file1
+      file2Spec <- paste0(file2, "::commit ", commit)
+      committedFile <- pngPipelineCheckoutToTemp(plotSpec(file2, commit = commit))
+      nPages2 <- getNPages(committedFile)
+    } else {
+      file2Spec <- file2
+      nPages2 <- getNPages(file2)
+    }
     if (nPages1 != nPages2 && !length(skip1) && !length(skip2)) {
       message(
         "The files have different page counts (", nPages1, " and ", nPages2, "). ",
@@ -257,7 +286,7 @@ plotExcelDiff <- function(file1, file2, filename, resolution = 100, FLAGopenExce
       out
     }
     col1 <- buildFileCol(file1, nPages1, skip1, resolution)
-    col2 <- buildFileCol(file2, nPages2, skip2, resolution)
+    col2 <- buildFileCol(file2Spec, nPages2, skip2, resolution)
 
     # Pad the shorter column with NA so both align to the same row count
     nPagesTotal <- max(length(col1), length(col2))
@@ -273,7 +302,8 @@ plotExcelDiff <- function(file1, file2, filename, resolution = 100, FLAGopenExce
     dPdfInfo[is.na(File1) | is.na(File2),`:=`(Diff = "Page lengths differ - no diff available::center")]
 
     # Subheader row: empty Page, file paths in File1/File2, empty Diff
-    dSubheader <- data.table(Page = "", File1 = paste0("* ", file1), File2 = paste0("* ", file2), Diff = "")
+    file2Label <- if (compareToCommit) paste0(file2, " (commit ", commit, ")") else file2
+    dSubheader <- data.table(Page = "", File1 = paste0("* ", file1), File2 = paste0("* ", file2Label), Diff = "")
     dPdfInfo <- data.table::rbindlist(list(dSubheader, dPdfInfo), use.names = TRUE)
 
     if (CFLAGLayout == "return") {
