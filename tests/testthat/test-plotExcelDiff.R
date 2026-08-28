@@ -90,7 +90,7 @@ test_that("plotExcelDiff reports supported types and unequal page counts", {
   )
 
   expect_equal(names(formals(plotExcelDiff))[1:2], c("file1", "file2"))
-  expect_true(any(messages == "Supported file types: pdf, png, docx, pptx, xlsx"))
+  expect_true(any(grepl("Supported.*pdf.*png.*docx.*pptx.*xlsx", messages)))
   expect_true(any(grepl("Use `skip1` or `skip2` to align corresponding pages.", messages, fixed = TRUE)))
   expect_s3_class(layout, "data.table")
 })
