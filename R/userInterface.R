@@ -115,7 +115,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
     # If print is wanted
     deparsedfilename <- deparse(sf)
   } else {
-    filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
+    filename <- resolveTempFilename()
     deparsedfilename <- deparse(filename)
   }
   verifyArg(fileSelection   , expectedMode = "character", allowNull = TRUE)
@@ -241,7 +241,7 @@ plotExcelDiff <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGop
       # If print is wanted
       deparsedfilename <- deparse(sf)
     } else {
-      filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
+      filename <- resolveTempFilename()
       deparsedfilename <- deparse(filename)
     }
     CFLAGLayout <- match.arg(CFLAGLayout)

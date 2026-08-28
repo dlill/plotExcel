@@ -1,5 +1,20 @@
 
 
+#' Resolve a temporary output filename
+#'
+#' @param ext File extension without a leading dot.
+#'
+#' @return A timestamped filename in the preferred project directory when it
+#'   exists, otherwise in the user's home directory.
+#' @md
+resolveTempFilename <- function(ext = "xlsx") {
+  baseDir <- if (.Platform$OS.type == "windows") "C:/PROJECTS" else path.expand("~/PROJECTS")
+  if (!dir.exists(baseDir)) baseDir <- path.expand("~/")
+
+  file.path(baseDir, paste0("tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"), ".", ext))
+}
+
+
 #' Verify that input arguments meet certain conditions
 #'
 #' @param x Any object

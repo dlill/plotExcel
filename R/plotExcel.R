@@ -58,7 +58,7 @@ plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = F
   if (mf & !FLAGtemp) stop("filename can't be missing when FLAGtemp == FALSE")
   pdfPageSize <- match.arg(pdfPageSize)
   if (FLAGtemp) {
-    filename <- paste0("C:/PROJECTS/tmp", format(Sys.time(), "--%Y-%m-%d_%H%M"),".xlsx")
+    filename <- resolveTempFilename()
   }
 
   # ------------------------------------------------------------------------- #
