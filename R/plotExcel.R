@@ -246,9 +246,14 @@ styleList <- list(
   )
 
 
-#' Print available styles
+#' Print available styles and decorator syntax
 #'
-#' @returns Prints available styles
+#' Lists the numbered text styles and the decorator syntax accepted by
+#' [parsePlotSpec()] and [parseTextSpec()], along with the image-diff expression
+#' syntax accepted in `plotExcel()` input tables. Plot decorator keys are
+#' derived from the arguments of [plotSpec()].
+#'
+#' @returns Prints available styles and decorator syntax.
 #' @export
 #' @md
 #' @family UI
@@ -256,7 +261,20 @@ styleList <- list(
 #' @examples
 #' availableStyles()
 availableStyles <- function() {
-  cat("Available styles:\n", paste0(seq_along(styleList), ": ", names(styleList) , collapse = "\n"), sep = "")
+  plotDecoratorKeys <- setdiff(names(formals(plotSpec)), "path")
+
+  cat(
+    "Available text styles:\n",
+    paste0(seq_along(styleList), ": ", names(styleList), collapse = "\n"),
+    "\n\nPlot decorator syntax:\n",
+    "path::key value::key2 value2\n",
+    "Valid keys: ", paste(plotDecoratorKeys, collapse = ", "),
+    "\n\nText decorator syntax:\n",
+    '"text::style"',
+    "\n\nDiff syntax:\n",
+    "diff(col1, col2)\n",
+    sep = ""
+  )
 }
 
 

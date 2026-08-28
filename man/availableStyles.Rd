@@ -2,15 +2,18 @@
 % Please edit documentation in R/plotExcel.R
 \name{availableStyles}
 \alias{availableStyles}
-\title{Print available styles}
+\title{Print available styles and decorator syntax}
 \usage{
 availableStyles()
 }
 \value{
-Prints available styles
+Prints available styles and decorator syntax.
 }
 \description{
-Print available styles
+Lists the numbered text styles and the decorator syntax accepted by
+\code{\link[=parsePlotSpec]{parsePlotSpec()}} and \code{\link[=parseTextSpec]{parseTextSpec()}}, along with the image-diff expression
+syntax accepted in \code{plotExcel()} input tables. Plot decorator keys are
+derived from the arguments of \code{\link[=plotSpec]{plotSpec()}}.
 }
 \examples{
 availableStyles()
