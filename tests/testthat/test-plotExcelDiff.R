@@ -1,4 +1,4 @@
-runDiffpdfCase <- function(f1, f2, testName) {
+runPlotExcelDiffCase <- function(f1, f2, testName) {
   ex <- system.file("exampleData", package = "plotExcel")
   skip_if(!nzchar(ex), "example data not installed")
   p1 <- file.path(ex, f1)
@@ -8,7 +8,7 @@ runDiffpdfCase <- function(f1, f2, testName) {
   out <- tempfile(pattern = paste0("file", testName), fileext = ".xlsx")
 
   res <- suppressNAcoercion(
-    diffpdf(p1, p2, filename = out, FLAGtemp = FALSE, FLAGopenExcel = FALSE)
+    plotExcelDiff(p1, p2, filename = out, FLAGtemp = FALSE, FLAGopenExcel = FALSE)
   )
 
   expect_true(file.exists(out))
@@ -16,23 +16,23 @@ runDiffpdfCase <- function(f1, f2, testName) {
   expect_equal(normalizePath(res, mustWork = FALSE), normalizePath(out, mustWork = FALSE))
 }
 
-test_that("diffpdf works for two PDF files", {
-  runDiffpdfCase("01-Iris.pdf", "02-Iris-Brewer.pdf", "pdf")
+test_that("plotExcelDiff works for two PDF files", {
+  runPlotExcelDiffCase("01-Iris.pdf", "02-Iris-Brewer.pdf", "pdf")
 })
 
-test_that("diffpdf works for two PNG files", {
-  runDiffpdfCase("01-Iris.png", "03-Iris-scale2.png", "png")
+test_that("plotExcelDiff works for two PNG files", {
+  runPlotExcelDiffCase("01-Iris.png", "03-Iris-scale2.png", "png")
 })
 
-test_that("diffpdf works for two PPTX files", {
-  runDiffpdfCase("11-Slides.pptx", "12-Slides.pptx", "pptx")
+test_that("plotExcelDiff works for two PPTX files", {
+  runPlotExcelDiffCase("11-Slides.pptx", "12-Slides.pptx", "pptx")
 })
 
-test_that("diffpdf works for two DOCX files", {
-  runDiffpdfCase("21-Word.docx", "22-Word.docx", "docx")
+test_that("plotExcelDiff works for two DOCX files", {
+  runPlotExcelDiffCase("21-Word.docx", "22-Word.docx", "docx")
 })
 
-test_that("diffpdf aligns pages via skip1 when the second file has extra slides", {
+test_that("plotExcelDiff aligns pages via skip1 when the second file has extra slides", {
   ex <- system.file("exampleData", package = "plotExcel")
   skip_if(!nzchar(ex), "example data not installed")
   p1 <- file.path(ex, "12-Slides.pptx")
@@ -44,7 +44,7 @@ test_that("diffpdf aligns pages via skip1 when the second file has extra slides"
   skip1 <- c(1, 3, 5, 6)
 
   d <- suppressNAcoercion(
-    diffpdf(p1, p2, skip1 = skip1, FLAGtemp = FALSE, FLAGopenExcel = FALSE, CFLAGLayout = "return")
+    plotExcelDiff(p1, p2, skip1 = skip1, FLAGtemp = FALSE, FLAGopenExcel = FALSE, CFLAGLayout = "return")
   )
 
   # Drop the subheader row (Page == "") for the page-level checks
@@ -64,7 +64,7 @@ test_that("diffpdf aligns pages via skip1 when the second file has extra slides"
   # Also confirm the Excel export path still works with the skip argument
   out <- tempfile(pattern = "fileSkip1", fileext = ".xlsx")
   res <- suppressNAcoercion(
-    diffpdf(p1, p2, filename = out, skip1 = skip1, FLAGtemp = FALSE, FLAGopenExcel = FALSE)
+    plotExcelDiff(p1, p2, filename = out, skip1 = skip1, FLAGtemp = FALSE, FLAGopenExcel = FALSE)
   )
   expect_true(file.exists(out))
   expect_gt(file.info(out)$size, 0)

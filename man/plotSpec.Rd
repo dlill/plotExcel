@@ -45,6 +45,7 @@ Other UI:
 \code{\link[=parsePlotSpec]{parsePlotSpec()}},
 \code{\link[=parseTextSpec]{parseTextSpec()}},
 \code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotExcelDiff]{plotExcelDiff()}},
 \code{\link[=plotExcelFolder]{plotExcelFolder()}},
 \code{\link[=textSpec]{textSpec()}}
 }

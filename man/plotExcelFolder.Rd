@@ -2,8 +2,7 @@
 % Please edit documentation in R/userInterface.R
 \name{plotExcelFolder}
 \alias{plotExcelFolder}
-\alias{diffpdf}
-\title{Export all plots in a folder into Excel or diff two pdfs/pngs}
+\title{Export all plots in a folder into Excel}
 \usage{
 plotExcelFolder(
   path,
@@ -16,18 +15,6 @@ plotExcelFolder(
   FLAGtemp = FALSE,
   filterRegexpRemove = NULL,
   compareToCommit = NULL
-)
-
-diffpdf(
-  pdfFile1,
-  pdfFile2,
-  filename,
-  resolution = 100,
-  FLAGopenExcel = TRUE,
-  FLAGtemp = TRUE,
-  skip1 = NULL,
-  skip2 = NULL,
-  CFLAGLayout = c("no", "return", "insert")
 )
 }
 \arguments{
@@ -53,22 +40,16 @@ diffpdf(
 \item{filterRegexpRemove}{regex to remove files}
 
 \item{compareToCommit}{Commit hash to compare the current HEAD to.}
-
-\item{skip1, skip2}{Optional integer vectors of output-row indices to leave blank for
-File1 / File2. Skipped rows shift the remaining pages of that file down so that
-pages meant to correspond can be aligned side-by-side. E.g. if file2 pages 1 and
-2 correspond to file1 pages 1 and 5, pass `skip2 = c(2,3,4)`.}
 }
 \value{
 Writes the Excel file to filename.
 }
 \description{
-Export all plots in a folder into Excel or diff two pdfs/pngs
+Export all plots in a folder into Excel
 }
 \examples{
 \dontrun{
 plotExcelFolder(system.file("exampleData", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
-diffpdf(system.file("exampleData/01-Iris.pdf", package =  "plotExcel"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
 }
 }
 \seealso{
@@ -80,6 +61,7 @@ Other UI:
 \code{\link[=parsePlotSpec]{parsePlotSpec()}},
 \code{\link[=parseTextSpec]{parseTextSpec()}},
 \code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotExcelDiff]{plotExcelDiff()}},
 \code{\link[=plotSpec]{plotSpec()}},
 \code{\link[=textSpec]{textSpec()}}
 }

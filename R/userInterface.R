@@ -77,7 +77,7 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 }
 
 
-#' Export all plots in a folder into Excel or diff two pdfs/pngs
+#' Export all plots in a folder into Excel
 #'
 #' @param path Path with plots. Will be searched recursively for pdf, png, docx and pptx files
 #' @param filename File path of the output excel file
@@ -102,7 +102,6 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 #' @examples
 #' \dontrun{
 #' plotExcelFolder(system.file("exampleData", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
-#' diffpdf(system.file("exampleData/01-Iris.pdf", package =  "plotExcel"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
 #' }
 plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 150, CFLAGLayout = c("no", "return", "insert"),
                             nPagesMax = 4, FLAGopenExcel = FALSE, FLAGtemp = FALSE, filterRegexpRemove = NULL,
@@ -202,15 +201,40 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
   invisible(filename)
 }
 
+#' Compare two plot files in Excel
+#'
+#' Creates an Excel workbook with the pages from two plot files side-by-side and
+#' a third column containing their image differences.
+#'
+#' @param pdfFile1,pdfFile2 Paths to the two plot files to compare.
+#' @param filename File path of the output Excel file.
+#' @param resolution Resolution in dpi used to render pages.
+#' @param FLAGopenExcel Open the Excel file after writing it?
+#' @param FLAGtemp Write to an automatically generated temporary output file?
 #' @param skip1,skip2 Optional integer vectors of output-row indices to leave blank for
 #'   File1 / File2. Skipped rows shift the remaining pages of that file down so that
 #'   pages meant to correspond can be aligned side-by-side. E.g. if file2 pages 1 and
 #'   2 correspond to file1 pages 1 and 5, pass `skip2 = c(2,3,4)`.
-#' @family UI
+#' @param CFLAGLayout What to do with the layout data.table: `"no"` writes the
+#'   workbook, `"return"` returns the table, and `"insert"` inserts the table as
+#'   code into the current script using the RSAddins package.
+#'
+#' @returns Invisibly returns the output filename, or the layout data.table when
+#'   `CFLAGLayout = "return"`.
 #' @export
-#' @rdname plotExcelFolder
-diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE,
-                    skip1 = NULL, skip2 = NULL, CFLAGLayout = c("no", "return", "insert")) {
+#' @md
+#' @family UI
+#' @examples
+#' \dontrun{
+#' plotExcelDiff(
+#'   system.file("exampleData/01-Iris.pdf", package = "plotExcel"),
+#'   system.file("exampleData/02-Iris-Brewer.pdf", package = "plotExcel"),
+#'   FLAGtemp = TRUE,
+#'   FLAGopenExcel = TRUE
+#' )
+#' }
+plotExcelDiff <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE,
+                          skip1 = NULL, skip2 = NULL, CFLAGLayout = c("no", "return", "insert")) {
     mf <- missing(filename)
     sf <- substitute(filename)
     if (!FLAGtemp & !mf) {

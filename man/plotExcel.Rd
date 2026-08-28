@@ -76,6 +76,7 @@ Other UI:
 \code{\link[=getNPages]{getNPages()}},
 \code{\link[=parsePlotSpec]{parsePlotSpec()}},
 \code{\link[=parseTextSpec]{parseTextSpec()}},
+\code{\link[=plotExcelDiff]{plotExcelDiff()}},
 \code{\link[=plotExcelFolder]{plotExcelFolder()}},
 \code{\link[=plotSpec]{plotSpec()}},
 \code{\link[=textSpec]{textSpec()}}
