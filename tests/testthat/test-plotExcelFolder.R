@@ -24,12 +24,16 @@ test_that("plotExcelFolder includes xlsx inputs in returned layouts", {
   ex <- system.file("exampleData", package = "plotExcel")
   skip_if(!nzchar(ex), "example data not installed")
 
-  layout <- plotExcelFolder(
-    path = ex,
-    FLAGtemp = FALSE,
-    FLAGopenExcel = FALSE,
-    CFLAGLayout = "return"
+  messages <- capture.output(
+    layout <- plotExcelFolder(
+      path = ex,
+      FLAGtemp = FALSE,
+      FLAGopenExcel = FALSE,
+      CFLAGLayout = "return"
+    ),
+    type = "message"
   )
 
+  expect_true(any(grepl("Supported file types: pdf, png, docx, pptx, xlsx", messages, fixed = TRUE)))
   expect_true(any(grepl("plots.xlsx", layout$Plot, fixed = TRUE)))
 })

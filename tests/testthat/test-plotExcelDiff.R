@@ -70,3 +70,26 @@ test_that("plotExcelDiff aligns pages via skip1 when the second file has extra s
   expect_gt(file.info(out)$size, 0)
   expect_equal(normalizePath(res, mustWork = FALSE), normalizePath(out, mustWork = FALSE))
 })
+
+test_that("plotExcelDiff reports supported types and unequal page counts", {
+  ex <- system.file("exampleData", package = "plotExcel")
+  skip_if(!nzchar(ex), "example data not installed")
+  p1 <- file.path(ex, "11-Slides.pptx")
+  p2 <- file.path(ex, "12-Slides.pptx")
+  skip_if_not(file.exists(p1) && file.exists(p2), paste("missing example:", p1, "/", p2))
+
+  messages <- capture.output(
+    layout <- plotExcelDiff(
+      p1,
+      p2,
+      FLAGtemp = FALSE,
+      FLAGopenExcel = FALSE,
+      CFLAGLayout = "return"
+    ),
+    type = "message"
+  )
+
+  expect_true(any(grepl("Supported file types: pdf, png, docx, pptx, xlsx", messages, fixed = TRUE)))
+  expect_true(any(grepl("Use `skip1` or `skip2` to align corresponding pages.", messages, fixed = TRUE)))
+  expect_s3_class(layout, "data.table")
+})

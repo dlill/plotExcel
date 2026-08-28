@@ -110,6 +110,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
                             ) {
 
 
+  message("Supported file types: ", paste(SUPPORTED_PLOT_EXTENSIONS, collapse = ", "))
   wrapperArguments <- resolveWrapperArguments(filename, substitute(filename), FLAGtemp, CFLAGLayout)
   filename <- wrapperArguments$filename
   deparsedfilename <- wrapperArguments$deparsedFilename
@@ -138,7 +139,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
     "The order of fileSelection will be applied.\n\n",
     "fileSelection <- ", paste0(gsub("c\\(", "c(\n", deparse(unique(dPdfInfo$pdfFile), width.cutoff = 20)), collapse = "\n"),"\n",
     "\n",
-    "Alternatively, use FLAGinsertLayout to insert the full excel spec table into your Rscript")
+    "Alternatively, set `CFLAGLayout = \"insert\"` to insert the full Excel specification table into your R script.")
 
   if (!FLAGtemp & mf & CFLAGLayout == "no") {
     # This means we are only interested in fileSelection.
@@ -220,6 +221,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
 #' }
 plotExcelDiff <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExcel = TRUE, FLAGtemp = TRUE,
                           skip1 = NULL, skip2 = NULL, CFLAGLayout = c("no", "return", "insert")) {
+  message("Supported file types: ", paste(SUPPORTED_PLOT_EXTENSIONS, collapse = ", "))
     wrapperArguments <- resolveWrapperArguments(filename, substitute(filename), FLAGtemp, CFLAGLayout)
     filename <- wrapperArguments$filename
     deparsedfilename <- wrapperArguments$deparsedFilename
@@ -234,6 +236,12 @@ plotExcelDiff <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGop
     # Get basic overview of pdf files and pages
     nPages1 <- getNPages(pdfFile1)
     nPages2 <- getNPages(pdfFile2)
+    if (nPages1 != nPages2 && !length(skip1) && !length(skip2)) {
+      message(
+        "The files have different page counts (", nPages1, " and ", nPages2, "). ",
+        "Use `skip1` or `skip2` to align corresponding pages."
+      )
+    }
 
     # Build one column of plotSpecs, leaving `skip` output rows blank and shifting
     # the remaining pages down. Returns a character vector whose length equals the

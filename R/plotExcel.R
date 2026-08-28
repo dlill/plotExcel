@@ -109,10 +109,11 @@ plotExcel <- function(d, filename, headerRowStyle = "center", FLAGaddBorders = F
   filename <- resolveLockedFilePath(filename)
   t0 <- Sys.time()
   openxlsx::saveWorkbook(wb = wb, file = filename, overwrite = TRUE)
-  message("Excel sheet was saved at ", filename, " (", signif(Sys.time() - t0, 2), " s)")
-  message("List available text styles with `availableStyles()`.")
+  message("Excel file was saved to ", filename, " (", signif(Sys.time() - t0, 2), " s)")
+  message("Run `availableStyles()` to see text styles and decorator syntax.")
 
   if (FLAGpdf) {
+    message("Generating a pdf from the Excel file since FLAGpdf = TRUE.")
     pdfFilename <- file.path(tempdir(), paste0(tools::file_path_sans_ext(basename(filename)), ".pdf"))
     convertOfficeToPdf(fileIn = filename, fileOut = pdfFilename, pageSize = pdfPageSize)
     utils::browseURL(pdfFilename)
