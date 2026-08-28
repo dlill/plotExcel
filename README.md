@@ -12,8 +12,12 @@ You can install the development version of plotExcel from [GitHub](https://githu
 
 ``` r
 # install.packages("devtools")
+devtools::install_github("dlill/RSAddins")
 devtools::install_github("dlill/plotExcel")
 ```
+
+`RSAddins` is required for inserting generated layout code into an R script and
+must be installed from [github.com/dlill/RSAddins](https://github.com/dlill/RSAddins).
 
 ## Example
 

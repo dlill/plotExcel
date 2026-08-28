@@ -5,8 +5,8 @@
 \title{Compare two plot files in Excel}
 \usage{
 plotExcelDiff(
-  pdfFile1,
-  pdfFile2,
+  file1,
+  file2,
   filename,
   resolution = 100,
   FLAGopenExcel = TRUE,
@@ -17,7 +17,7 @@ plotExcelDiff(
 )
 }
 \arguments{
-\item{pdfFile1, pdfFile2}{Paths to the two plot files to compare.}
+\item{file1, file2}{Paths to the two plot files to compare.}
 
 \item{filename}{File path of the output Excel file.}
 

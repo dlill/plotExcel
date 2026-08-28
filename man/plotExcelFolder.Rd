@@ -19,7 +19,7 @@ plotExcelFolder(
 }
 \arguments{
 \item{path}{Path with plots. Will be searched recursively for pdf, png, docx,
-pptx, and xlsx files.}
+and pptx files.}
 
 \item{filename}{File path of the output excel file}
 

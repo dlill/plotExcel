@@ -50,7 +50,7 @@ test_that("plotExcelDiff aligns pages via skip1 when the second file has extra s
   # Drop the subheader row (Page == "") for the page-level checks
   dPages <- d[Page != ""]
 
-  # File1 cells at skipped rows must be blank; other rows must reference pdfFile1
+  # File1 cells at skipped rows must be blank; other rows must reference file1
   expect_true(all(is.na(dPages$File1[skip1])))
   expect_true(all(grepl(basename(p1), dPages$File1[-skip1], fixed = TRUE)))
 
@@ -80,8 +80,8 @@ test_that("plotExcelDiff reports supported types and unequal page counts", {
 
   messages <- capture.output(
     layout <- plotExcelDiff(
-      p1,
-      p2,
+      file1 = p1,
+      file2 = p2,
       FLAGtemp = FALSE,
       FLAGopenExcel = FALSE,
       CFLAGLayout = "return"
@@ -89,7 +89,8 @@ test_that("plotExcelDiff reports supported types and unequal page counts", {
     type = "message"
   )
 
-  expect_true(any(grepl("Supported file types: pdf, png, docx, pptx, xlsx", messages, fixed = TRUE)))
+  expect_equal(names(formals(plotExcelDiff))[1:2], c("file1", "file2"))
+  expect_true(any(grepl("Supported file types: pdf, png, docx, pptx", messages, fixed = TRUE)))
   expect_true(any(grepl("Use `skip1` or `skip2` to align corresponding pages.", messages, fixed = TRUE)))
   expect_s3_class(layout, "data.table")
 })

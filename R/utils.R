@@ -1,6 +1,6 @@
 
 
-SUPPORTED_PLOT_EXTENSIONS <- c("pdf", "png", "docx", "pptx", "xlsx")
+SUPPORTED_PLOT_EXTENSIONS <- c("pdf", "png", "docx", "pptx")
 
 
 #' Resolve a temporary output filename
