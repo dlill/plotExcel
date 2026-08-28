@@ -37,5 +37,5 @@ Construct all temp plot file names from a plotSpec
 }
 \examples{
 path <- system.file("exampleData/01-Iris.pdf", package = "plotExcel")
-epFiles(path, commit = "HEAD", page = 1)
+plotExcel:::epFiles(path, commit = "HEAD", page = 1)
 }

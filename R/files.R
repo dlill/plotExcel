@@ -10,7 +10,7 @@
 #'
 #' @examples
 #' path <- system.file("exampleData/01-Iris.pdf", package = "plotExcel")
-#' epFiles(path, commit = "HEAD", page = 1)
+#' plotExcel:::epFiles(path, commit = "HEAD", page = 1)
 epFiles <- function(path, commit = "HEAD", page = 1, resolution = 100, xmin = 0, xmax = 100, ymin = 0, ymax = 100, ...) {
 
   path <- normalizePath(path, mustWork = TRUE, winslash = .Platform$file.sep)
