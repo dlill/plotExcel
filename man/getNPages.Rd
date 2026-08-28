@@ -18,7 +18,7 @@ don't have to be converted to PDF just to get a page count.
 }
 \details{
 \itemize{
-\item \code{.pdf}  -> \code{\link[pdftools:qpdf]{pdftools::pdf_length()}}
+\item \code{.pdf}  -> \code{\link[pdftools:pdf_length]{pdftools::pdf_length()}}
 \item \code{.png}  -> 1
 \item \code{.pptx} -> number of \code{ppt/slides/slide*.xml} entries in the zip container
 \item \code{.docx} -> \verb{<Pages>} field parsed from \code{docProps/app.xml} in the zip
@@ -28,15 +28,15 @@ present (e.g. docx files produced by tools other than Word).
 }
 }
 \seealso{
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{epFiles}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotExcelFolder}()},
-\code{\link{plotSpec}()},
-\code{\link{textSpec}()}
+Other UI:
+\code{\link[=availableStyles]{availableStyles()}},
+\code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
+\code{\link[=epFiles]{epFiles()}},
+\code{\link[=parsePlotSpec]{parsePlotSpec()}},
+\code{\link[=parseTextSpec]{parseTextSpec()}},
+\code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotExcelFolder]{plotExcelFolder()}},
+\code{\link[=plotSpec]{plotSpec()}},
+\code{\link[=textSpec]{textSpec()}}
 }
 \concept{UI}

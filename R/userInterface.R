@@ -101,8 +101,8 @@ compareProjects_excelPlot <- function(projectMulti, filename, fileSelection = NU
 #' @importFrom data.table rbindlist
 #' @examples
 #' \dontrun{
-#' plotExcelFolder(system.file("exampleData", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
-#' diffpdf(system.file("exampleData/01-Iris.pdf", package =  "excelPlot"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+#' plotExcelFolder(system.file("exampleData", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+#' diffpdf(system.file("exampleData/01-Iris.pdf", package =  "plotExcel"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
 #' }
 plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 150, CFLAGLayout = c("no", "return", "insert"),
                             nPagesMax = 4, FLAGopenExcel = FALSE, FLAGtemp = FALSE, filterRegexpRemove = NULL,
@@ -185,7 +185,7 @@ plotExcelFolder <- function(path, filename, fileSelection = NULL, resolution = 1
 
     codeToInsert <- paste0(c(paste0("dLayout <- ", RSAddins::outputMdTable2(dPdfInfo)),
                              "",
-                             paste0("excelPlot::plotExcel(d = dLayout, filename = ", deparsedfilename, ", textColWidth = 10)"),
+                             paste0("plotExcel::plotExcel(d = dLayout, filename = ", deparsedfilename, ", textColWidth = 10)"),
                              "\n"),
                            collapse = "\n")
 
@@ -274,7 +274,7 @@ diffpdf <- function(pdfFile1, pdfFile2, filename, resolution = 100, FLAGopenExce
 
       codeToInsert <- paste0(c(paste0("dLayout <- ", RSAddins::outputMdTable2(dPdfInfo)),
                                "",
-                               paste0("excelPlot::plotExcel(d = dLayout, filename = ", deparsedfilename, ", textColWidth = 10)"),
+                               paste0("plotExcel::plotExcel(d = dLayout, filename = ", deparsedfilename, ", textColWidth = 10)"),
                                "\n"),
                              collapse = "\n")
 

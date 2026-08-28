@@ -1,5 +1,5 @@
 runDiffpdfCase <- function(f1, f2, testName) {
-  ex <- system.file("exampleData", package = "excelPlot")
+  ex <- system.file("exampleData", package = "plotExcel")
   skip_if(!nzchar(ex), "example data not installed")
   p1 <- file.path(ex, f1)
   p2 <- file.path(ex, f2)
@@ -33,7 +33,7 @@ test_that("diffpdf works for two DOCX files", {
 })
 
 test_that("diffpdf aligns pages via skip1 when the second file has extra slides", {
-  ex <- system.file("exampleData", package = "excelPlot")
+  ex <- system.file("exampleData", package = "plotExcel")
   skip_if(!nzchar(ex), "example data not installed")
   p1 <- file.path(ex, "12-Slides.pptx")
   p2 <- file.path(ex, "13-Slides-insertedDummySlidesForSkipping.pptx")

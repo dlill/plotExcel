@@ -1,18 +1,18 @@
 
-# excelPlot
+# plotExcel
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of excelPlot is to ...
+The goal of plotExcel is to ...
 
 ## Installation
 
-You can install the development version of excelPlot from [GitHub](https://github.com/) with:
+You can install the development version of plotExcel from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("dlill/excelPlot")
+devtools::install_github("dlill/plotExcel")
 ```
 
 ## Example
@@ -20,7 +20,7 @@ devtools::install_github("dlill/excelPlot")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(excelPlot)
+library(plotExcel)
 ## basic example code
 ```
 

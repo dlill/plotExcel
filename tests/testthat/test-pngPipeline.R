@@ -1,7 +1,7 @@
 test_that("Various steps of the pipeline work", {
   library(ggplot2)
 
-  testDir <- file.path(tempdir(), "excelPlot/test-pngPipeline")
+  testDir <- file.path(tempdir(), "plotExcel/test-pngPipeline")
   unlink(testDir, recursive = TRUE)
   dir.create(testDir, showWarnings = FALSE, recursive = TRUE)
 

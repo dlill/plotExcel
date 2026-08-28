@@ -1,5 +1,5 @@
 test_that("plotExcelFolder can dump all files in inst/exampleData", {
-  ex <- system.file("exampleData", package = "excelPlot")
+  ex <- system.file("exampleData", package = "plotExcel")
   skip_if(!nzchar(ex), "example data not installed")
 
   out <- tempfile(fileext = ".xlsx")

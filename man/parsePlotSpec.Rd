@@ -16,20 +16,20 @@ A \code{\link[=plotSpec]{plotSpec()}}
 Parse a decorated string into a plotSpec
 }
 \examples{
-path <- system.file("exampleData/01-Iris.pdf", package = "excelPlot")
+path <- system.file("exampleData/01-Iris.pdf", package = "plotExcel")
 text <- paste0(path, "::commit HEAD::page 20::xmax 50::ymin 20")
 parsePlotSpec(text)
 }
 \seealso{
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{epFiles}()},
-\code{\link{getNPages}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotExcelFolder}()},
-\code{\link{plotSpec}()},
-\code{\link{textSpec}()}
+Other UI:
+\code{\link[=availableStyles]{availableStyles()}},
+\code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
+\code{\link[=epFiles]{epFiles()}},
+\code{\link[=getNPages]{getNPages()}},
+\code{\link[=parseTextSpec]{parseTextSpec()}},
+\code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotExcelFolder]{plotExcelFolder()}},
+\code{\link[=plotSpec]{plotSpec()}},
+\code{\link[=textSpec]{textSpec()}}
 }
 \concept{UI}

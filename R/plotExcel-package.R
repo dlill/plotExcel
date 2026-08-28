@@ -16,5 +16,3 @@ NULL
 
 # Export these as global variables so the CRAN check does not complain
 FILE <- HEIGHTCM <- ISPLOT <- PATHS <- SPEC <- VALUE <- VARIABLE <- WIDTHCM <- NULL
-
-

@@ -1,7 +1,7 @@
 test_that("Idempotency algorithm works", {
   library(ggplot2)
 
-  testDir <- file.path(tempdir(), "excelPlot/test-idempotency")
+  testDir <- file.path(tempdir(), "plotExcel/test-idempotency")
   unlink(testDir, recursive = TRUE)
   dir.create(testDir, showWarnings = FALSE, recursive = TRUE)
 

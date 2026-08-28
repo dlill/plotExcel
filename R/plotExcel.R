@@ -31,15 +31,15 @@
 #' d <- data.table(tibble::tribble(
 #'   ~Description, ~`Plots 1`, ~`Plots 2`, ~Comparison,
 #'   "Crop::3",
-#'   paste0(system.file("exampleData/01-Iris.pdf", package = "excelPlot"), "::xmax 85"),
-#'   paste0(system.file("exampleData/02-Iris-Brewer.pdf", package = "excelPlot")),
+#'   paste0(system.file("exampleData/01-Iris.pdf", package = "plotExcel"), "::xmax 85"),
+#'   paste0(system.file("exampleData/02-Iris-Brewer.pdf", package = "plotExcel")),
 #'   "diff(`Plots 1`, `Plots 2`)",
 #'   "Text rotated up::4",
-#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 2"),
-#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 1"),
+#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "plotExcel"), "::page 2"),
+#'   paste0(system.file("exampleData/04-IrisMulti.pdf", package = "plotExcel"), "::page 1"),
 #'   "diff(`Plots 1`, `Plots 2`)"
 #' ))
-#' filename <- "~/.excelPlot/example.xlsx"
+#' filename <- "~/.plotExcel/example.xlsx"
 #' plotExcel(d, filename = filename, headerRowStyle = "center",
 #'   FLAGaddBorders = FALSE, FLAGpdf = FALSE, textColWidth = 5)
 #' # Export to pdf and open in viewer - commented out for CRAN check, run manually

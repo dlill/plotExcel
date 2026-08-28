@@ -25,6 +25,8 @@ diffpdf(
   resolution = 100,
   FLAGopenExcel = TRUE,
   FLAGtemp = TRUE,
+  skip1 = NULL,
+  skip2 = NULL,
   CFLAGLayout = c("no", "return", "insert")
 )
 }
@@ -51,6 +53,11 @@ diffpdf(
 \item{filterRegexpRemove}{regex to remove files}
 
 \item{compareToCommit}{Commit hash to compare the current HEAD to.}
+
+\item{skip1, skip2}{Optional integer vectors of output-row indices to leave blank for
+File1 / File2. Skipped rows shift the remaining pages of that file down so that
+pages meant to correspond can be aligned side-by-side. E.g. if file2 pages 1 and
+2 correspond to file1 pages 1 and 5, pass `skip2 = c(2,3,4)`.}
 }
 \value{
 Writes the Excel file to filename.
@@ -60,31 +67,20 @@ Export all plots in a folder into Excel or diff two pdfs/pngs
 }
 \examples{
 \dontrun{
-plotExcelFolder(system.file("exampleData", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
-diffpdf(system.file("exampleData/01-Iris.pdf", package =  "excelPlot"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "excelPlot"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+plotExcelFolder(system.file("exampleData", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
+diffpdf(system.file("exampleData/01-Iris.pdf", package =  "plotExcel"), system.file("exampleData/02-Iris-Brewer.pdf", package =  "plotExcel"), FLAGtemp = TRUE, FLAGopenExcel = TRUE)
 }
 }
 \seealso{
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{epFiles}()},
-\code{\link{getNPages}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotSpec}()},
-\code{\link{textSpec}()}
-
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{epFiles}()},
-\code{\link{getNPages}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotSpec}()},
-\code{\link{textSpec}()}
+Other UI:
+\code{\link[=availableStyles]{availableStyles()}},
+\code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
+\code{\link[=epFiles]{epFiles()}},
+\code{\link[=getNPages]{getNPages()}},
+\code{\link[=parsePlotSpec]{parsePlotSpec()}},
+\code{\link[=parseTextSpec]{parseTextSpec()}},
+\code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotSpec]{plotSpec()}},
+\code{\link[=textSpec]{textSpec()}}
 }
 \concept{UI}

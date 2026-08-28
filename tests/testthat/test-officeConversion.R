@@ -27,7 +27,7 @@ test_that("convertOfficeToPdf exports Excel in single and A4 modes", {
   ) == 0
   skip_if_not(excelAvailable, "Microsoft Excel is not installed")
 
-  fileIn <- system.file("exampleData/plots.xlsx", package = "excelPlot")
+  fileIn <- system.file("exampleData/plots.xlsx", package = "plotExcel")
   single <- tempfile(fileext = ".pdf")
   a4 <- tempfile(fileext = ".pdf")
   on.exit(unlink(c(single, a4)), add = TRUE)
@@ -39,7 +39,7 @@ test_that("convertOfficeToPdf exports Excel in single and A4 modes", {
 })
 
 test_that("Excel inputs use a PDF intermediate in the PNG pipeline", {
-  fileIn <- system.file("exampleData/plots.xlsx", package = "excelPlot")
+  fileIn <- system.file("exampleData/plots.xlsx", package = "plotExcel")
   files <- epFiles(path = fileIn)
 
   expect_equal(tools::file_ext(files$tmpPathCommitPdf), "pdf")

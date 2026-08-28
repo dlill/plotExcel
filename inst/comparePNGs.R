@@ -23,7 +23,7 @@ rm(list = ls())
 ## Preliminaries ====
 # Set working directory to script folder
 try(setwd(dirname(rstudioapi::getSourceEditorContext()$path)), silent = TRUE)
-stopifnot(basename(dirname(getwd())) == "excelPlot")
+stopifnot(basename(dirname(getwd())) == "plotExcel")
 
 # Default packages (do not load other packages, use "::" instead)
 library(dplyr)
@@ -33,10 +33,10 @@ library(ggplot2)
 # -------------------------------------------------------------------------#
 #  ----
 # -------------------------------------------------------------------------#
-devtools::load_all("C:/PROJECTS/1_PROJTOOLS/excelPlot/")
+devtools::load_all("C:/PROJECTS/1_PROJTOOLS/plotExcel/")
 
-l <- paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 1")
-r <- paste0(system.file("exampleData/04-IrisMulti.pdf", package = "excelPlot"), "::page 2")
+l <- paste0(system.file("exampleData/04-IrisMulti.pdf", package = "plotExcel"), "::page 1")
+r <- paste0(system.file("exampleData/04-IrisMulti.pdf", package = "plotExcel"), "::page 2")
 
 # fll <- applyPngPipelineOnePage(parsePlotSpec(l))
 # flr <- applyPngPipelineOnePage(parsePlotSpec(r))

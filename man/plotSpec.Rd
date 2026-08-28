@@ -33,19 +33,19 @@ List of the input arguments
 This function also does error checking.
 }
 \examples{
-path <- system.file("exampleData/01-Iris.pdf", package = "excelPlot")
+path <- system.file("exampleData/01-Iris.pdf", package = "plotExcel")
 plotSpec <- plotSpec(path, commit = "asdf234", page = 1, xmax = 85)
 }
 \seealso{
-Other UI: 
-\code{\link{availableStyles}()},
-\code{\link{compareProjects_excelPlot}()},
-\code{\link{epFiles}()},
-\code{\link{getNPages}()},
-\code{\link{parsePlotSpec}()},
-\code{\link{parseTextSpec}()},
-\code{\link{plotExcel}()},
-\code{\link{plotExcelFolder}()},
-\code{\link{textSpec}()}
+Other UI:
+\code{\link[=availableStyles]{availableStyles()}},
+\code{\link[=compareProjects_excelPlot]{compareProjects_excelPlot()}},
+\code{\link[=epFiles]{epFiles()}},
+\code{\link[=getNPages]{getNPages()}},
+\code{\link[=parsePlotSpec]{parsePlotSpec()}},
+\code{\link[=parseTextSpec]{parseTextSpec()}},
+\code{\link[=plotExcel]{plotExcel()}},
+\code{\link[=plotExcelFolder]{plotExcelFolder()}},
+\code{\link[=textSpec]{textSpec()}}
 }
 \concept{UI}

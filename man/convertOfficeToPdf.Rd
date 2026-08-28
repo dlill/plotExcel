@@ -24,7 +24,7 @@ pages. Word and PowerPoint documents retain their native page layout.
 }
 \examples{
 \dontrun{
-fileIn <- system.file("exampleData/plots.xlsx", package = "excelPlot")
+fileIn <- system.file("exampleData/plots.xlsx", package = "plotExcel")
 fileOut <- tempfile(fileext = ".pdf")
 convertOfficeToPdf(fileIn, fileOut, pageSize = "single")
 unlink(fileOut)
